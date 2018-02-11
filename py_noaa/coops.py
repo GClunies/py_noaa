@@ -7,7 +7,7 @@ import math
 
 import time
 from datetime import datetime, timedelta, date
-
+import sys
 
 def build_query_url(begin_date, end_date, stationid, product, datum=None, bin_num=None, units='metric', time_zone='gmt'):
 
@@ -15,13 +15,13 @@ def build_query_url(begin_date, end_date, stationid, product, datum=None, bin_nu
 
     if product=='water_level':
         if datum==None:    # check that datum is specified
-            return 'Error! No datum specified. See https://tidesandcurrents.noaa.gov/api/#datum for list of available datums'
+            sys.exit('ERROR! No datum specified for water level data. See https://tidesandcurrents.noaa.gov/api/#datum for list of available datums')
         else:
             parameters = ['begin_date='+begin_date, 'end_date='+end_date, 'station='+stationid, 'product='+product, 'datum='+datum, 'units='+units, 'time_zone='+time_zone,'application=web_services','format=json']
 
     elif product=='currents':
         if bin_num==None:
-            return 'Error!: No bin specified. Bin info can be found on the station info page (e.g., https://tidesandcurrents.noaa.gov/cdata/StationInfo?id=PUG1515)'
+            sys.exit('ERROR! No bin specified for current data. Bin info can be found on the station info page (e.g., https://tidesandcurrents.noaa.gov/cdata/StationInfo?id=PUG1515)')
         else:
             parameters = ['begin_date='+begin_date, 'end_date='+end_date, 'station='+stationid, 'product='+product, 'bin='+str(bin_num), 'units='+units, 'time_zone='+time_zone,'application=web_services','format=json']
     
@@ -80,7 +80,7 @@ def get_data(begin_date, end_date, stationid, product, datum=None, bin_num=None,
             return df
 
 # Testing code functionality
-df_test = get_data("20150727", "20150909", "PUG1515", "currents", datum = None, bin_num = 1, units = "metric", time_zone = "gmt")
+df_test = get_data("20150727", "20150909", "PUG1515", "water_level", units = "metric", time_zone = "gmt")
 
 print(df_test.tail())
             
