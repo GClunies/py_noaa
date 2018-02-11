@@ -33,6 +33,15 @@ def build_query_url(begin_date, end_date, stationid, product, datum=None, bin_nu
 
     return query_url
 
+def url2pandas(data_url):
+    
+    response = requests.get(data_url)
+    json_str = response.text
+    json_dict = json.loads(json_str)
+    df = json_normalize(json_dict['data'])
+    
+    return df
+
 
 def get_data(begin_date, end_date, stationid, product, datum=None, bin_num=None, units='metric', time_zone='gmt'):
 
@@ -46,11 +55,7 @@ def get_data(begin_date, end_date, stationid, product, datum=None, bin_num=None,
 
         print(data_url)
 
-        response = requests.get(data_url)
-        json_str = response.text
-        json_dict = json.loads(json_str)
-        df= json_normalize(json_dict["data"])
-        return df
+        df = url2pandas(data_url)
         
     
     else:    # if delta.days > 31
@@ -69,10 +74,7 @@ def get_data(begin_date, end_date, stationid, product, datum=None, bin_num=None,
             
             data_url = build_query_url(begin_datetime.strftime('%Y%m%d'),end_datetime_loop.strftime('%Y%m%d'), stationid, product, datum, bin_num, units, time_zone)
 
-            response = requests.get(data_url)
-            json_str = response.text
-            json_dict = json.loads(json_str)
-            df_new = json_normalize(json_dict["data"])
+            df_new = url2pandas(data_url)
             df = df.append(df_new)
         
             return df
