@@ -83,7 +83,6 @@ def get_data(begin_date, end_date, stationid, product, datum=None, bin_num=None,
     # we can pull the data from API in one request
     if delta.days <=31:
         data_url = build_query_url(begin_date, end_date, stationid, product, datum, bin_num, units, time_zone)
-        print(data_url)
 
         df = url2pandas(data_url)
 
@@ -113,13 +112,8 @@ def get_data(begin_date, end_date, stationid, product, datum=None, bin_num=None,
             
             # build the url for each API request block as we proceed through the loop
             data_url = build_query_url(begin_datetime_loop.strftime('%Y%m%d'),end_datetime_loop.strftime('%Y%m%d'), stationid, product, datum, bin_num, units, time_zone)
-            print(data_url)
 
             df_new = url2pandas(data_url)    # get data for each block as a pandas dataframe 
             df = df.append(df_new)           # append the dataframe from each request block to the existing dataframe 
         
     return df
-
-df_currents = get_data(begin_date="20150101", end_date="20150331", stationid="9442396", product="water_level", datum="MLLW", units="metric", time_zone="gmt")
-
-print(df_currents.head())
