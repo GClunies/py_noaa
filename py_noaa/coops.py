@@ -83,6 +83,7 @@ def get_data(begin_date, end_date, stationid, product, datum=None, bin_num=None,
     # we can pull the data from API in one request
     if delta.days <=31:
         data_url = build_query_url(begin_date, end_date, stationid, product, datum, bin_num, units, time_zone)
+        print(data_url)
 
         df = url2pandas(data_url)
 
@@ -100,10 +101,10 @@ def get_data(begin_date, end_date, stationid, product, datum=None, bin_num=None,
 
         # loop through in 31 day blocks, 
         # adjust the begin_datetime and end_datetime accordingly,
-        # make a request to the NOAA CO-OPS API,
+        # make a request to the NOAA CO-OPS API
         for i in range(num_31day_blocks + 1):
-            begin_datetime += timedelta(days = (i*31) )
-            end_datetime_loop = begin_datetime + timedelta(days=31)    # ensures we only call 31 days at a time
+            begin_datetime_loop = begin_datetime + timedelta(days = (i*31) )
+            end_datetime_loop = begin_datetime_loop + timedelta(days=31)    # ensures we only call 31 days at a time
 
             # check if the end_datetime_loop of the current 31 day block is greater
             # than the end_date specified by user. If it is, use the end_date specified by user 
@@ -111,10 +112,14 @@ def get_data(begin_date, end_date, stationid, product, datum=None, bin_num=None,
                 end_datetime_loop = end_datetime
             
             # build the url for each API request block as we proceed through the loop
-            data_url = build_query_url(begin_datetime.strftime('%Y%m%d'),end_datetime_loop.strftime('%Y%m%d'), stationid, product, datum, bin_num, units, time_zone)
+            data_url = build_query_url(begin_datetime_loop.strftime('%Y%m%d'),end_datetime_loop.strftime('%Y%m%d'), stationid, product, datum, bin_num, units, time_zone)
+            print(data_url)
 
             df_new = url2pandas(data_url)    # get data for each block as a pandas dataframe 
             df = df.append(df_new)           # append the dataframe from each request block to the existing dataframe 
         
     return df
 
+df_currents = get_data(begin_date="20150101", end_date="20150331", stationid="9442396", product="water_level", datum="MLLW", units="metric", time_zone="gmt")
+
+print(df_currents.head())
