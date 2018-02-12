@@ -118,6 +118,3 @@ def get_data(begin_date, end_date, stationid, product, datum=None, bin_num=None,
         
     return df
 
-df_test = get_data("20150727", "20150910", "PUG1515", "currents", bin_num=1)
-
-print(df_test)
