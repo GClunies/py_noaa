@@ -9,6 +9,7 @@ import time
 from datetime import datetime, timedelta, date
 import sys
 
+
 def build_query_url(begin_date, end_date, stationid, product, datum=None, bin_num=None, units='metric', time_zone='gmt'):
     """
     Builds a URL to be used to fetch data from the NOAA CO-OPS API (see https://tidesandcurrents.noaa.gov/api/)
@@ -16,41 +17,50 @@ def build_query_url(begin_date, end_date, stationid, product, datum=None, bin_nu
 
     base_url = 'http://tidesandcurrents.noaa.gov/api/datagetter?'
 
+    # if the data product is water levels, check that a datum is specified
     if product=='water_level':
-        if datum==None:    # check that datum is specified
+        if datum==None:
             sys.exit('ERROR! No datum specified for water level data. See https://tidesandcurrents.noaa.gov/api/#datum for list of available datums')
-        else:
+        else:   
+            # compile parameter string for use in URL
             parameters = ['begin_date='+begin_date, 'end_date='+end_date, 'station='+stationid, 'product='+product, 'datum='+datum, 'units='+units, 'time_zone='+time_zone,'application=web_services','format=json']
 
+    # if the data product is currents, check that a bin number is specified
     elif product=='currents':
         if bin_num==None:
             sys.exit('ERROR! No bin specified for current data. Bin info can be found on the station info page (e.g., https://tidesandcurrents.noaa.gov/cdata/StationInfo?id=PUG1515)')
-        else:
+        else:    
+            # compile parameter string for use in URL
             parameters = ['begin_date='+begin_date, 'end_date='+end_date, 'station='+stationid, 'product='+product, 'bin='+str(bin_num), 'units='+units, 'time_zone='+time_zone,'application=web_services','format=json']
     
-    else:
+    # for all other data types (e.g., meteoroligcal conditions)
+    else:    
+        # compile parameter string for use in URL
         parameters = ['begin_date='+begin_date, 'end_date='+end_date, 'station='+stationid, 'product='+product, 'units='+units, 'time_zone='+time_zone,'application=web_services','format=json']
 
-    parameters_url = '&'.join(parameters)
-    query_url = ''.join([base_url, parameters_url])
+    parameters_url = '&'.join(parameters)              # join parameters to single string
+    query_url = ''.join([base_url, parameters_url])    # joing parameter string with base url for use in url2pandas function
 
     return query_url
+
 
 def url2pandas(data_url):
     """
     Takes in a provided url using the NOAA CO-OPS API conventions (see https://tidesandcurrents.noaa.gov/api/), converts the corresponding json data into a pandas dataframe
     """
-    response = requests.get(data_url)
-    json_str = response.text
-    json_dict = json.loads(json_str)
-    df = json_normalize(json_dict['data'])
+    response = requests.get(data_url)        # get json data from url
+    json_str = response.text                 # json as a string 
+    json_dict = json.loads(json_str)         # convert json string to a dictionary for parsing
+    df = json_normalize(json_dict['data'])   # parse json dictionary for data into dataframe
     
     return df
 
 
 def get_data(begin_date, end_date, stationid, product, datum=None, bin_num=None, units='metric', time_zone='gmt'):
     """
-    Gets data from NOAA CO-OPS API (see https://tidesandcurrents.noaa.gov/api/) and converts it to a pandas dataframe for convienent analysis
+    Function to get data from NOAA CO-OPS API and convert it to a pandas dataframe for convienent analysis
+
+    Info on the NOOA CO-OPS API can be found here: https://tidesandcurrents.noaa.gov/api/
 
     Arguments:
     begin_date -- the starting date of request, string in yyyyMMdd format
@@ -63,32 +73,43 @@ def get_data(begin_date, end_date, stationid, product, datum=None, bin_num=None,
     time_zone -- time zone to be used for data output (default gmt)
     """
 
+    # convert dates to datetime objects so deltas can be calculated
     begin_datetime = datetime.strptime(begin_date, '%Y%m%d')
     end_datetime = datetime.strptime(end_date, '%Y%m%d')
-
     delta = end_datetime - begin_datetime
 
+    # If the length of our data request is less or equal to 31 days,
+    # we can pull the data from API in one request
     if delta.days <=31:
         data_url = build_query_url(begin_date, end_date, stationid, product, datum, bin_num, units, time_zone)
 
         df = url2pandas(data_url)
         
-    
-    else:    # if delta.days > 31
+    # If the length of our data request is greater than 31 days, 
+    # we need to pull the data from API using requests of 31 day "blocks" 
+    # (NOAA API prohibits requests larger than 31 days)
+    else:
+        # find the number of 31 day blocks in our desired period,
+        # constrain the upper limit of index in the for loop to follow
         num_31day_blocks = math.floor(delta.days/31)
 
-        df = pd.DataFrame([])
+        df = pd.DataFrame([])    # initialize empty dataframe to store data from API requests
 
+        # loop through each 31 day block, 
+        # adjust the begin_datetime and end_datetime accordingly,
+        # make a request to the NOAA CO-OPS API,
         for i in range(num_31day_blocks + 1):
             begin_datetime += timedelta(days = (i*31) )
-            end_datetime_loop = begin_datetime + timedelta(days=30)
+            end_datetime_loop = begin_datetime + timedelta(days=30)    # enusres we only call 31 days at a time
 
+            # if the last request to the API has a block size less than 31 days
             if delta.days < 31: 
                 end_datetime_loop = end_datetime
             
+            # build the url for each API request block as we proceed through the loop
             data_url = build_query_url(begin_datetime.strftime('%Y%m%d'),end_datetime_loop.strftime('%Y%m%d'), stationid, product, datum, bin_num, units, time_zone)
 
-            df_new = url2pandas(data_url)
-            df = df.append(df_new)
+            df_new = url2pandas(data_url)    # get data for each block as a pandas dataframe 
+            df = df.append(df_new)           # append the dataframe from each request block to the existing dataframe 
         
             return df
