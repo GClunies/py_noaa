@@ -54,7 +54,7 @@ Two examples are shown below:
 4  0,0,0,0  v  0.006  2015-01-01 00:24   0.026
 ```
 
-### Exporting data 
+### Exporting Data 
 ---
 Since data is returned in a pandas dataframe, exporting the data is simple using the `.to_csv` method on the returned pandas dataframe. 
 
@@ -65,5 +65,5 @@ Since data is returned in a pandas dataframe, exporting the data is simple using
 You can set the delimeter type using the `sep=` argument in the `.to_csv` method and control the file encoding using the `encoding=` argument. Setting `index=False` will prevent the index from the pandas dataframe from being inlcuded in the exported csv file. Example:
 
 ```
->>> df_currents(f'example.csv', encoding='utf-8', index=False)
+>>> df_currents('example.csv', encoding='utf-8', index=False)
 ```
