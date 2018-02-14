@@ -21,7 +21,7 @@ First, get the station for which you would like to get data, a summary of availa
 - [Current Observation Stations](https://tidesandcurrents.noaa.gov/cdata/StationList?type=Current+Data&filter=active)
 - [Meteorological Observation Stations](https://tidesandcurrents.noaa.gov/stations.html?type=Meteorological%20Observations)
 
-Useful station info is also typically available for diffent datasets at a given station (e.g., [station info](https://tidesandcurrents.noaa.gov/cdata/StationInfo?id=PUG1515) for current data at a station in Puget Sound)
+Useful station info is also typically available for different datasets at a given station (e.g., [station info](https://tidesandcurrents.noaa.gov/cdata/StationInfo?id=PUG1515) for current data at a station in Puget Sound)
 
 You can then fetch data from the API using the `coops.get_data` function for various data products, listed [here](https://tidesandcurrents.noaa.gov/api/#products). 
 
@@ -56,14 +56,16 @@ Two examples are shown below:
 
 ### Exporting Data 
 ---
-Since data is returned in a pandas dataframe, exporting the data is simple using the `.to_csv` method on the returned pandas dataframe. 
+Since data is returned in a pandas dataframe, exporting the data is simple using the `.to_csv` method on the returned pandas dataframe. This requires the [pandas](https://pandas.pydata.org/) module to already be imported into your workspace.
 
 ``` 
+>>> import pandas as pd
 >>> df_currents.to_csv('example.csv')
 ```
 
 You can set the delimeter type using the `sep=` argument in the `.to_csv` method and control the file encoding using the `encoding=` argument. Setting `index=False` will prevent the index from the pandas dataframe from being inlcuded in the exported csv file. Example:
 
 ```
+>>> import pandas as pd
 >>> df_currents('example.csv', encoding='utf-8', index=False)
 ```
