@@ -60,6 +60,7 @@ Since data is returned in a pandas dataframe, exporting the data is simple using
 
 ``` 
 >>> import pandas as pd
+>>> df_currents = coops.get_data(begin_date="20150727", end_date="20150910", stationid="PUG1515", product="currents", bin_num=1, units="metric", time_zone="gmt")
 >>> df_currents.to_csv('example.csv')
 ```
 
