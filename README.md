@@ -1,7 +1,7 @@
 # py_noaa
 py_noaa is a Python package containing modules for fetching data from various NOAA APIs (e.g., NOAA Tides & Currents) and returning the data in convient formats (i.e., pandas datadrame) for further analysis in python. This package is under development, additional modules will be added as I encounter use cases that justify new API modules being added.
 
-Install with `pip install py_noaa`.
+Install with `pip install py_noaa`
 
 **Currently available modules:**
 - NOAA CO-OPS Tides & Currents ([see API documentation](https://tidesandcurrents.noaa.gov/api/))
