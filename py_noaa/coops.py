@@ -20,7 +20,7 @@ def build_query_url(begin_date, end_date, stationid, product, datum=None, bin_nu
     # if the data product is water levels, check that a datum is specified
     if product=='water_level':
         if datum==None:
-            sys.exit('ERROR! No datum specified for water level data. See https://tidesandcurrents.noaa.gov/api/#datum for list of available datums')
+            raise ValueError('No datum specified for water level data. See https://tidesandcurrents.noaa.gov/api/#datum for list of available datums')
         else:   
             # compile parameter string for use in URL
             parameters = ['begin_date='+begin_date, 'end_date='+end_date, 'station='+stationid, 'product='+product, 'datum='+datum, 'units='+units, 'time_zone='+time_zone,'application=web_services','format=json']
@@ -28,7 +28,7 @@ def build_query_url(begin_date, end_date, stationid, product, datum=None, bin_nu
     # if the data product is currents, check that a bin number is specified
     elif product=='currents':
         if bin_num==None:
-            sys.exit('ERROR! No bin specified for current data. Bin info can be found on the station info page (e.g., https://tidesandcurrents.noaa.gov/cdata/StationInfo?id=PUG1515)')
+            raise ValueError('No bin specified for current data. Bin info can be found on the station info page (e.g., https://tidesandcurrents.noaa.gov/cdata/StationInfo?id=PUG1515)')
         else:    
             # compile parameter string for use in URL
             parameters = ['begin_date='+begin_date, 'end_date='+end_date, 'station='+stationid, 'product='+product, 'bin='+str(bin_num), 'units='+units, 'time_zone='+time_zone,'application=web_services','format=json']
