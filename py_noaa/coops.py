@@ -52,6 +52,11 @@ def url2pandas(data_url):
     response = requests.get(data_url)        # get json data from url
     json_str = response.text                 # json as a string 
     json_dict = json.loads(json_str)         # convert json string to a dictionary for parsing
+
+    if 'error' in json_dict:
+        raise ValueError(
+            json_dict['error'].get('message', 'Error retrieving data'))
+
     df = json_normalize(json_dict['data'])   # parse json dictionary for data into dataframe
     
     return df
