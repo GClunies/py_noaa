@@ -36,7 +36,8 @@ Two examples are shown below:
 ...     end_date="20150910",
 ...     stationid="PUG1515",
 ...     product="currents",
-...     bin_num=1, units="metric",
+...     bin_num=1,
+...     units="metric",
 ...     time_zone="gmt")
 ...
 >>> df_currents.head()
