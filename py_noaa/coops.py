@@ -99,7 +99,7 @@ def get_data(begin_date, end_date, stationid, product, datum=None, bin_num=None,
     else:
         # find the number of 31 day blocks in our desired period,
         # constrain the upper limit of index in the for loop to follow
-        num_31day_blocks = math.floor(delta.days/31)
+        num_31day_blocks = int(math.floor(delta.days/31))
 
         df = pd.DataFrame([])    # initialize empty dataframe to store data from API requests
 
