@@ -6,7 +6,7 @@ import pytest
 
 def test_error_handling():
     with pytest.raises(ValueError):
-        coops.get_value(
+        coops.get_data(
             begin_date="20150101",
             end_date="20150331",
             stationid="9442396",
