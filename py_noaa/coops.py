@@ -46,7 +46,9 @@ def build_query_url(begin_date, end_date, stationid, product, datum=None, bin_nu
 
 def url2pandas(data_url):
     """
-    Takes in a provided url using the NOAA CO-OPS API conventions (see https://tidesandcurrents.noaa.gov/api/), converts the corresponding json data into a pandas dataframe
+    Takes in a provided url using the NOAA CO-OPS API conventions 
+    (see https://tidesandcurrents.noaa.gov/api/), converts the corresponding 
+    json data into a pandas dataframe
     """
 
     response = requests.get(data_url)        # get json data from url
@@ -64,7 +66,8 @@ def url2pandas(data_url):
 
 def get_data(begin_date, end_date, stationid, product, datum=None, bin_num=None, units='metric', time_zone='gmt'):
     """
-    Function to get data from NOAA CO-OPS API and convert it to a pandas dataframe for convienent analysis
+    Function to get data from NOAA CO-OPS API and convert it to a 
+    pandas dataframe for convienent analysis
 
     Info on the NOOA CO-OPS API can be found here: https://tidesandcurrents.noaa.gov/api/
 
@@ -94,7 +97,7 @@ def get_data(begin_date, end_date, stationid, product, datum=None, bin_num=None,
         return df
         
     # If the length the user specified data request is greater than 31 days, 
-    # need to pull the data from API using requests of 31 day "blocks" since 
+    # need to pull the data from API using requests of 31 day 'blocks' since 
     # NOAA API prohibits requests larger than 31 days
     else:
         # find the number of 31 day blocks in our desired period,
@@ -121,4 +124,27 @@ def get_data(begin_date, end_date, stationid, product, datum=None, bin_num=None,
             df_new = url2pandas(data_url)    # get data for each block as a pandas dataframe 
             df = df.append(df_new)           # append the dataframe from each request block to the existing dataframe 
         
+    # rename output dataframe columns and convert to useable data types
+    if product == 'water_level':
+        # rename columns for clarity
+        df.rename(columns = {'f': 'flags', 'q': 'QC', 's': 'sigma', 't': 'date_time', 'v': 'water_level'}, inplace=True)
+        
+        # convert columns to numeric values (they are strings objects before this)
+        data_cols = df.columns.drop(['flags', 'date_time'])
+        df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
+
+        # convert date & time strings to datetime objects
+        df['date_time'] = pd.to_datetime(df['date_time'])
+
+    elif product == 'currents':
+        # rename columns for clarity
+        df.rename(columns = {'b': 'bin', 'd': 'direction', 's': 'speed', 't': 'date_time'}, inplace=True)
+        
+        # convert columns to numeric values (they are strings objects before this)
+        data_cols = df.columns.drop(['date_time'])
+        df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
+        
+        # convert date & time strings to datetime objects
+        df['date_time'] = pd.to_datetime(df['date_time'])
+
     return df
