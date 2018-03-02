@@ -8,3 +8,8 @@ dist/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+
+# Testing & Coverage
+.cache
+.coverage
+.pytest_cache

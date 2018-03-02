@@ -28,9 +28,18 @@ You can then fetch data from the API using the `coops.get_data` function for var
 Two examples are shown below:
 
 **Observed Currents**
-```
+
+```python
 >>> from py_noaa import coops
->>> df_currents = coops.get_data(begin_date="20150727", end_date="20150910", stationid="PUG1515", product="currents", bin_num=1, units="metric", time_zone="gmt")
+>>> df_currents = coops.get_data(
+...     begin_date="20150727",
+...     end_date="20150910",
+...     stationid="PUG1515",
+...     product="currents",
+...     bin_num=1,
+...     units="metric",
+...     time_zone="gmt")
+...
 >>> df_currents.head()
    b    d       s                 t
 0  1  255  32.100  2015-07-27 20:06
@@ -38,13 +47,22 @@ Two examples are shown below:
 2  1  261  29.300  2015-07-27 20:18
 3  1  260  27.300  2015-07-27 20:24
 4  1  261  23.000  2015-07-27 20:30
+
 ```
 
 **Observed Water Levels**
 
-```
+```python
 >>> from py_noaa import coops
->>> df_water_levels = coops.get_data(begin_date="20150101", end_date="20150331", stationid="9442396", product="water_level", datum="MLLW", units="metric", time_zone="gmt")
+>>> df_water_levels = coops.get_data(
+...     begin_date="20150101",
+...     end_date="20150331",
+...     stationid="9442396",
+...     product="water_level",
+...     datum="MLLW",
+...     units="metric",
+...     time_zone="gmt")
+...
 >>> df_water_levels.head()
          f  q      s                 t       v
 0  0,0,0,0  v  0.006  2015-01-01 00:00  -0.045
@@ -52,21 +70,34 @@ Two examples are shown below:
 2  0,0,0,0  v  0.017  2015-01-01 00:12  -0.021
 3  0,0,0,0  v  0.009  2015-01-01 00:18   0.008
 4  0,0,0,0  v  0.006  2015-01-01 00:24   0.026
+
 ```
 
 ### Exporting Data 
 ---
 Since data is returned in a pandas dataframe, exporting the data is simple using the `.to_csv` method on the returned pandas dataframe. This requires the [pandas](https://pandas.pydata.org/) module to already be imported into your workspace.
 
-``` 
->>> import pandas as pd
->>> df_currents = coops.get_data(begin_date="20150727", end_date="20150910", stationid="PUG1515", product="currents", bin_num=1, units="metric", time_zone="gmt")
+```python
+>>> df_currents = coops.get_data(
+...     begin_date="20150727",
+...     end_date="20150910",
+...     stationid="PUG1515",
+...     product="currents",
+...     bin_num=1,
+...     units="metric",
+...     time_zone="gmt")
+...
 >>> df_currents.to_csv('example.csv')
+
 ```
 
 You can set the delimeter type using the `sep=` argument in the `.to_csv` method and control the file encoding using the `encoding=` argument. Setting `index=False` will prevent the index from the pandas dataframe from being inlcuded in the exported csv file. Example:
 
-```
->>> import pandas as pd
->>> df_currents('example.csv', encoding='utf-8', index=False)
+```python
+>>> df_currents.to_csv(
+...     'example.csv',
+...     sep='\t',
+...     encoding='utf-8',
+...     index=False)
+
 ```
