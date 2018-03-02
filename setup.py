@@ -8,6 +8,6 @@ setup(name='py_noaa',
       author_email='greg.clunies@gmail.com',
       license='MIT',
       packages=['py_noaa'],
-      install_requires=['requests'],
+      install_requires=['requests', 'numpy', 'pandas'],
       zip_safe=False)
       
