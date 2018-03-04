@@ -73,6 +73,30 @@ Two examples are shown below:
 
 ```
 
+**Predicted Water Levels (Tides)**
+
+```python
+>>> from py_noaa import coops
+>>> df_predictions = coops.get_data(
+...     begin_date="20121115",
+...     end_date="20121217",
+...     stationid="9447130",
+...     product="predictions",
+...     datum="MLLW",
+...     interval="h",
+...     units="metric",
+...     time_zone="gmt")
+...
+>>> df_predictions.head()
+            date_time  predicted_wl
+0 2012-11-15 00:00:00         3.660
+1 2012-11-15 01:00:00         3.431
+2 2012-11-15 02:00:00         2.842
+3 2012-11-15 03:00:00         1.974
+4 2012-11-15 04:00:00         0.953
+
+```
+
 ### Exporting Data 
 ---
 Since data is returned in a pandas dataframe, exporting the data is simple using the `.to_csv` method on the returned pandas dataframe. This requires the [pandas](https://pandas.pydata.org/) module to already be imported into your workspace.
