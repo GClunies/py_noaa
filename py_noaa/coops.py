@@ -29,8 +29,9 @@ def build_query_url(begin_date,
     # if the data product is water levels, check that a datum is specified
     if product=='water_level':
         if datum==None:
-            raise ValueError('No datum specified for water level data.See https://tidesandcurrents.noaa.gov/api/#datum '
-                'for list of available datums')
+            raise ValueError('No datum specified for water level data.See'
+                        ' https://tidesandcurrents.noaa.gov/api/#datum '
+                        'for list of available datums')
         else:   
             # compile parameter string for use in URL
             parameters = ['begin_date='+begin_date, 
@@ -43,11 +44,30 @@ def build_query_url(begin_date,
                           'application=web_services',
                           'format=json']
 
+    elif product=='predictions':
+        if interval==None:
+            raise ValueError('No interval specified for water level predictions.'
+                        ' See https://tidesandcurrents.noaa.gov/api/#interval'
+                        ' for list of available intervals')
+        else:   
+            # compile parameter string for use in URL
+            parameters = ['begin_date='+begin_date, 
+                          'end_date='+end_date, 
+                          'station='+stationid, 
+                          'product='+product, 
+                          'datum='+datum,
+                          'interval='+interval, 
+                          'units='+units, 
+                          'time_zone='+time_zone,
+                          'application=web_services',
+                          'format=json']
+
     # if the data product is currents, check that a bin number is specified
     elif product=='currents':
         if bin_num==None:
             raise ValueError('No bin specified for current data. Bin info can be '
-                'found on the station info page (e.g., https://tidesandcurrents.noaa.gov/cdata/StationInfo?id=PUG1515)')
+                             'found on the station info page' 
+                             ' (e.g., https://tidesandcurrents.noaa.gov/cdata/StationInfo?id=PUG1515)')
         else:    
             # compile parameter string for use in URL
             parameters = ['begin_date='+begin_date, 
@@ -78,10 +98,11 @@ def build_query_url(begin_date,
     return query_url
 
 
-def url2pandas(data_url):
+def url2pandas(data_url, product):
     """
-    Takes in a provided url using the NOAA CO-OPS API conventions (see https://tidesandcurrents.noaa.gov/api/),
-    converts the corresponding json data into a pandas dataframe
+    Takes in a provided url using the NOAA CO-OPS API conventions
+    (see https://tidesandcurrents.noaa.gov/api/) and converts the corresponding
+    json data into a pandas dataframe
     """
 
     response = requests.get(data_url)    # get json data from url
@@ -92,7 +113,12 @@ def url2pandas(data_url):
         raise ValueError(
             json_dict['error'].get('message', 'Error retrieving data'))
 
-    df = json_normalize(json_dict['data'])   # parse json dict into dataframe
+    if product == 'predictions':
+        key = 'predictions'
+    else:
+        key = 'data'
+
+    df = json_normalize(json_dict[key])   # parse json dict into dataframe
     
     return df
 
@@ -102,13 +128,16 @@ def get_data(begin_date,
              stationid, 
              product, 
              datum=None, 
-             bin_num=None, 
+             bin_num=None,
+             interval=None,  
              units='metric', 
              time_zone='gmt'):
     """
-    Function to get data from NOAA CO-OPS API and convert it to a pandas dataframe for convienent analysis
+    Function to get data from NOAA CO-OPS API and convert it to a pandas 
+    dataframe for convienent analysis
 
-    Info on the NOOA CO-OPS API can be found here: https://tidesandcurrents.noaa.gov/api/
+    Info on the NOOA CO-OPS API can be found here: 
+    https://tidesandcurrents.noaa.gov/api/
 
     Arguments:
     begin_date -- the starting date of request, string in yyyyMMdd format
@@ -116,7 +145,8 @@ def get_data(begin_date,
     stationid -- station at which you want data
     product -- the product type you would like
     datum -- the datum to be used for water level data  (default None)
-    bin_num -- the bin number you would like your current data at (default None) 
+    bin_num -- the bin number you would like your current data at (default None)
+    interval -- the  
     units -- units to be used for data output (default metric)
     time_zone -- time zone to be used for data output (default gmt)
     """
@@ -130,15 +160,16 @@ def get_data(begin_date,
     # we can pull the data from API in one request
     if delta.days <=31:
         data_url = build_query_url(begin_date, 
-                                    end_date, 
-                                    stationid, 
-                                    product, 
-                                    datum, 
-                                    bin_num, 
-                                    units, 
-                                    time_zone)
+                                   end_date, 
+                                   stationid, 
+                                   product, 
+                                   datum, 
+                                   bin_num,
+                                   interval, 
+                                   units, 
+                                   time_zone)
 
-        df = url2pandas(data_url)
+        df = url2pandas(data_url, product)
 
         return df
         
@@ -171,11 +202,12 @@ def get_data(begin_date,
                                        product, 
                                        datum, 
                                        bin_num,
+                                       interval,
                                        units, 
                                        time_zone)
 
-            df_new = url2pandas(data_url)    # each block as a pandas dataframe, 
-            df = df.append(df_new)           # append to existing dataframe 
+            df_new = url2pandas(data_url, product)    # get dataframe for block 
+            df = df.append(df_new)    # append to existing dataframe 
         
     # rename output dataframe columns and convert to useable data types
     if product == 'water_level':
@@ -186,6 +218,18 @@ def get_data(begin_date,
         
         # convert columns to numeric values
         data_cols = df.columns.drop(['flags', 'date_time'])
+        df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
+
+        # convert date & time strings to datetime objects
+        df['date_time'] = pd.to_datetime(df['date_time'])
+
+    elif product == 'predictions':
+        # rename columns for clarity
+        df.rename(columns = {'t': 'date_time', 'v': 'predicted_wl'}, 
+                             inplace=True)
+        
+        # convert columns to numeric values
+        data_cols = df.columns.drop(['date_time'])
         df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
 
         # convert date & time strings to datetime objects
