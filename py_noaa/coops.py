@@ -170,8 +170,6 @@ def get_data(begin_date,
                                    time_zone)
 
         df = url2pandas(data_url, product)
-
-        return df
         
     # If the length the user specified data request is greater than 31 days, 
     # need to pull the data from API using requests of 31 day 'blocks' since 
