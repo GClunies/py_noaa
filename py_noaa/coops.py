@@ -215,7 +215,7 @@ def get_data(begin_date,
                              inplace=True)
         
         # convert columns to numeric values
-        data_cols = df.columns.drop(['flags', 'date_time'])
+        data_cols = df.columns.drop(['flags', 'QC', 'date_time'])
         df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
 
         # convert date & time strings to datetime objects
