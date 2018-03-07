@@ -12,8 +12,9 @@ setup(name='py_noaa',
           'Intended Audience :: Science/Research',
           'Topic :: Scientific/Engineering',
           'License :: OSI Approved :: MIT License',
-          'Programming Language :: Python :: 2.7, 3.5, 3.6'
-          # Python sersions
+          'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3.5',
+          'Programming Language :: Python :: 3.6',
       ],
       packages=['py_noaa'],
       install_requires=['requests', 'numpy', 'pandas'],
