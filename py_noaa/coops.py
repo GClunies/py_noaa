@@ -58,7 +58,7 @@ def build_query_url(begin_date,
                           'application=py_noaa',
                           'format=json']
         else:   
-            # compile parameter string for use in URL
+            # compile parameter string, including interval, for use in URL
             parameters = ['begin_date='+begin_date, 
                           'end_date='+end_date, 
                           'station='+stationid, 
@@ -102,7 +102,7 @@ def build_query_url(begin_date,
                       'application=py_noaa', 
                       'format=json']
         else:    
-            # compile parameter string for use in URL
+            # compile parameter string, including interval, for use in URL
             parameters = ['begin_date='+begin_date, 
                       'end_date='+end_date, 
                       'station='+stationid, 
@@ -192,7 +192,7 @@ def get_data(begin_date,
 
         df = url2pandas(data_url, product)
         
-    # If the length the user specified data request is greater than 31 days, 
+    # If the length of the user specified data request is greater than 31 days, 
     # need to pull the data from API using requests of 31 day 'blocks' since 
     # NOAA API prohibits requests larger than 31 days
     else:
@@ -228,7 +228,8 @@ def get_data(begin_date,
             df_new = url2pandas(data_url, product)    # get dataframe for block 
             df = df.append(df_new)    # append to existing dataframe 
         
-    # rename output dataframe columns and convert to useable data types
+    # rename output dataframe columns based on requested product
+    # and convert to useable data types
     if product == 'water_level':
         # rename columns for clarity
         df.rename(columns = {'f': 'flags', 'q': 'QC', 's': 'sigma',
@@ -318,7 +319,8 @@ def get_data(begin_date,
         df['date_time'] = pd.to_datetime(df['date_time'])
 
 
-    df.index = df['date_time']    # set datetime to index (for use in resampling)
+    # set datetime to index (for use in resampling)
+    df.index = df['date_time']
     df = df.drop(columns=['date_time'])
 
     # handle hourly requests for water_level and currents data
