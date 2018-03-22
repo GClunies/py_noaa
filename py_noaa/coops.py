@@ -41,7 +41,7 @@ def build_query_url(begin_date,
                           'datum='+datum, 
                           'units='+units, 
                           'time_zone='+time_zone,
-                          'application=web_services',
+                          'application=py_noaa',
                           'format=json']
 
     elif product=='predictions':
@@ -55,7 +55,7 @@ def build_query_url(begin_date,
                           'datum='+datum, 
                           'units='+units, 
                           'time_zone='+time_zone,
-                          'application=web_services',
+                          'application=py_noaa',
                           'format=json']
         else:   
             # compile parameter string for use in URL
@@ -67,7 +67,7 @@ def build_query_url(begin_date,
                           'interval='+interval, 
                           'units='+units, 
                           'time_zone='+time_zone,
-                          'application=web_services',
+                          'application=py_noaa',
                           'format=json']
 
     # if the data product is currents, check that a bin number is specified
@@ -85,7 +85,7 @@ def build_query_url(begin_date,
                           'bin='+str(bin_num), 
                           'units='+units, 
                           'time_zone='+time_zone, 
-                          'application=web_services', 
+                          'application=py_noaa', 
                           'format=json']
     
     # for all other data types (e.g., meteoroligcal conditions)
@@ -99,7 +99,7 @@ def build_query_url(begin_date,
                       'product='+product, 
                       'units='+units, 
                       'time_zone='+time_zone, 
-                      'application=web_services', 
+                      'application=py_noaa', 
                       'format=json']
         else:    
             # compile parameter string for use in URL
@@ -110,7 +110,7 @@ def build_query_url(begin_date,
                       'interval='+interval, 
                       'units='+units, 
                       'time_zone='+time_zone, 
-                      'application=web_services', 
+                      'application=py_noaa', 
                       'format=json']
 
     parameters_url = '&'.join(parameters)    # join parameters to single string
