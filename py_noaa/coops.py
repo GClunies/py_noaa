@@ -45,10 +45,18 @@ def build_query_url(begin_date,
                           'format=json']
 
     elif product=='predictions':
+        # if no interval provided, return 6-min predictions data
         if interval==None:
-            raise ValueError('No interval specified for water level predictions.'
-                        ' See https://tidesandcurrents.noaa.gov/api/#interval'
-                        ' for list of available intervals')
+            # compile parameter string for use in URL
+            parameters = ['begin_date='+begin_date, 
+                          'end_date='+end_date, 
+                          'station='+stationid, 
+                          'product='+product, 
+                          'datum='+datum, 
+                          'units='+units, 
+                          'time_zone='+time_zone,
+                          'application=web_services',
+                          'format=json']
         else:   
             # compile parameter string for use in URL
             parameters = ['begin_date='+begin_date, 
@@ -81,12 +89,25 @@ def build_query_url(begin_date,
                           'format=json']
     
     # for all other data types (e.g., meteoroligcal conditions)
-    else:    
-        # compile parameter string for use in URL
-        parameters = ['begin_date='+begin_date, 
+    else:
+        # if no interval provided, return 6-min met data
+        if interval==None:    
+            # compile parameter string for use in URL
+            parameters = ['begin_date='+begin_date, 
                       'end_date='+end_date, 
                       'station='+stationid, 
                       'product='+product, 
+                      'units='+units, 
+                      'time_zone='+time_zone, 
+                      'application=web_services', 
+                      'format=json']
+        else:    
+            # compile parameter string for use in URL
+            parameters = ['begin_date='+begin_date, 
+                      'end_date='+end_date, 
+                      'station='+stationid, 
+                      'product='+product,
+                      'interval='+interval, 
                       'units='+units, 
                       'time_zone='+time_zone, 
                       'application=web_services', 
@@ -245,5 +266,63 @@ def get_data(begin_date,
         
         # convert date & time strings to datetime objects
         df['date_time'] = pd.to_datetime(df['date_time'])
+
+    elif product == 'wind':
+        # rename columns for clarity
+        df.rename(columns = {'d': 'dir', 'dr': 'compass',
+                             'f': 'flags', 'g': 'gust_spd',
+                             's': 'spd', 't': 'date_time'},
+                             inplace=True)
+        
+        # convert columns to numeric values
+        data_cols = df.columns.drop(['date_time', 'flags', 'compass'])
+        df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
+        
+        # convert date & time strings to datetime objects
+        df['date_time'] = pd.to_datetime(df['date_time'])
+
+    elif product == 'air_pressure':
+        # rename columns for clarity
+        df.rename(columns = {'f': 'flags', 't': 'date_time', 'v':'air_press'},
+                             inplace=True)
+        
+        # convert columns to numeric values
+        data_cols = df.columns.drop(['date_time', 'flags'])
+        df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
+        
+        # convert date & time strings to datetime objects
+        df['date_time'] = pd.to_datetime(df['date_time'])
+
+    elif product == 'air_temperature':
+        # rename columns for clarity
+        df.rename(columns = {'f': 'flags', 't': 'date_time', 'v':'air_temp'},
+                             inplace=True)
+        
+        # convert columns to numeric values
+        data_cols = df.columns.drop(['date_time', 'flags'])
+        df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
+        
+        # convert date & time strings to datetime objects
+        df['date_time'] = pd.to_datetime(df['date_time'])
+
+    elif product == 'water_temperature':
+        # rename columns for clarity
+        df.rename(columns = {'f': 'flags', 't': 'date_time', 'v':'water_temp'},
+                             inplace=True)
+        
+        # convert columns to numeric values
+        data_cols = df.columns.drop(['date_time', 'flags'])
+        df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
+        
+        # convert date & time strings to datetime objects
+        df['date_time'] = pd.to_datetime(df['date_time'])
+
+
+    df.index = df['date_time']    # set datetime to index (for use in resampling)
+    df = df.drop(columns=['date_time'])
+
+    # handle hourly requests for water_level and currents data
+    if (product == 'water_level') | (product == 'currents') & (interval == 'h'):
+        df = df.resample('H').first()    # only return the hourly data
 
     return df
