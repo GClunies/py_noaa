@@ -65,7 +65,7 @@ Compatibility with other data products listed on the [NOAA CO-OPS API](https://t
 ...     units="metric",
 ...     time_zone="gmt")
 ...
->>> df_currents.head()
+>>> df_currents.head() # doctest: +NORMALIZE_WHITESPACE
                      bin  direction  speed
 date_time
 2015-07-27 20:06:00  1.0      255.0   32.1
@@ -89,7 +89,7 @@ date_time
 ...     units="metric",
 ...     time_zone="gmt")
 ...
->>> df_water_levels.head()
+>>> df_water_levels.head() # doctest: +NORMALIZE_WHITESPACE
                        flags QC  sigma  water_level
 date_time
 2015-01-01 00:00:00  0,0,0,0  v  0.023        1.799
@@ -116,13 +116,14 @@ Note the use of the `interval` parameter to specify only hourly data be returned
 ...     units="metric",
 ...     time_zone="gmt")
 ...
->>> df_predictions.head()
-            date_time  predicted_wl
-0 2012-11-15 00:00:00         3.660
-1 2012-11-15 01:00:00         3.431
-2 2012-11-15 02:00:00         2.842
-3 2012-11-15 03:00:00         1.974
-4 2012-11-15 04:00:00         0.953
+>>> df_predictions.head() # doctest: +NORMALIZE_WHITESPACE
+                     predicted_wl
+date_time
+2012-11-15 00:00:00         3.660
+2012-11-15 01:00:00         3.431
+2012-11-15 02:00:00         2.842
+2012-11-15 03:00:00         1.974
+2012-11-15 04:00:00         0.953
 
 ```
 
@@ -142,7 +143,7 @@ All data is returned as a pandas dataframe, with a DatimeIndex which allows for 
 ...     units="metric",
 ...     time_zone="gmt")
 ...
->>> df_predictions['201211150000':'201211151200']
+>>> df_predictions['201211150000':'201211151200'] # doctest: +NORMALIZE_WHITESPACE
                      predicted_wl
 date_time
 2012-11-15 00:00:00         3.660
@@ -158,6 +159,7 @@ date_time
 2012-11-15 10:00:00         1.053
 2012-11-15 11:00:00         2.114
 2012-11-15 12:00:00         3.006
+
 ```
 
 ### Exporting Data 
