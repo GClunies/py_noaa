@@ -8,6 +8,10 @@ This package is under development, additional modules will be added as use cases
 ---
 `pip install py_noaa`
 
+You can update `py_noaa` using:
+
+`pip install py_noaa --upgrade`
+
 ## Available Modules & Data:
 ---
 - [NOAA CO-OPS Tides & Currents](https://tidesandcurrents.noaa.gov/)
@@ -24,7 +28,7 @@ py_noaa accesses data following the [NOAA CO-OPS API](https://tidesandcurrents.n
 <br>
 ### **CO-OPS module basics**
 ---
-1. Get the station ID for the station of interest, a summary of available stations, by data type, can be found through the following links:
+1. Get the station ID for your station of interest, a summary of available stations, by data type, can be found through the following links:
 
     - [Water Level Observation Stations](https://tidesandcurrents.noaa.gov/stations.html?type=Water+Levels)
     - [Tidal Prediction Stations](https://tidesandcurrents.noaa.gov/tide_predictions.html)
@@ -39,7 +43,12 @@ py_noaa accesses data following the [NOAA CO-OPS API](https://tidesandcurrents.n
 - Currents
 - Observed water levels
 - Predicted water levels (tides)
+- Winds
+- Air pressure
+- Air temperature
+- Water temperature
 
+Compatibility with other data products listed on the [NOAA CO-OPS API](https://tidesandcurrents.noaa.gov/api/#products) may exist but is not guaranteed at this time.
 
 ### Examples data requests are shown below:
 
@@ -56,13 +65,14 @@ py_noaa accesses data following the [NOAA CO-OPS API](https://tidesandcurrents.n
 ...     units="metric",
 ...     time_zone="gmt")
 ...
->>> df_currents.head()
-   bin  direction  speed           date_time
-0  1.0      255.0   32.1 2015-07-27 20:06:00
-1  1.0      255.0   30.1 2015-07-27 20:12:00
-2  1.0      261.0   29.3 2015-07-27 20:18:00
-3  1.0      260.0   27.3 2015-07-27 20:24:00
-4  1.0      261.0   23.0 2015-07-27 20:30:00
+>>> df_currents.head() # doctest: +NORMALIZE_WHITESPACE
+                     bin  direction  speed
+date_time
+2015-07-27 20:06:00  1.0      255.0   32.1
+2015-07-27 20:12:00  1.0      255.0   30.1
+2015-07-27 20:18:00  1.0      261.0   29.3
+2015-07-27 20:24:00  1.0      260.0   27.3
+2015-07-27 20:30:00  1.0      261.0   23.0
 
 ```
 
@@ -73,23 +83,26 @@ py_noaa accesses data following the [NOAA CO-OPS API](https://tidesandcurrents.n
 >>> df_water_levels = coops.get_data(
 ...     begin_date="20150101",
 ...     end_date="20150331",
-...     stationid="9442396",
+...     stationid="9447130",
 ...     product="water_level",
 ...     datum="MLLW",
 ...     units="metric",
 ...     time_zone="gmt")
 ...
->>> df_water_levels.head()
-     flags QC  sigma           date_time  water_level
-0  0,0,0,0  v  0.006 2015-01-01 00:00:00       -0.045
-1  0,0,0,0  v  0.008 2015-01-01 00:06:00       -0.028
-2  0,0,0,0  v  0.017 2015-01-01 00:12:00       -0.021
-3  0,0,0,0  v  0.009 2015-01-01 00:18:00        0.008
-4  0,0,0,0  v  0.006 2015-01-01 00:24:00        0.026
+>>> df_water_levels.head() # doctest: +NORMALIZE_WHITESPACE
+                       flags QC  sigma  water_level
+date_time
+2015-01-01 00:00:00  0,0,0,0  v  0.023        1.799
+2015-01-01 01:00:00  0,0,0,0  v  0.014        0.977
+2015-01-01 02:00:00  0,0,0,0  v  0.009        0.284
+2015-01-01 03:00:00  0,0,0,0  v  0.010       -0.126
+2015-01-01 04:00:00  0,0,0,0  v  0.013       -0.161
 
 ```
 
 **Predicted Water Levels (Tides)**
+
+Note the use of the `interval` parameter to specify only hourly data be returned. The `interval` parameter works with, water level, currents, predictions, and meteorological data types.
 
 ```python
 >>> from py_noaa import coops
@@ -103,13 +116,49 @@ py_noaa accesses data following the [NOAA CO-OPS API](https://tidesandcurrents.n
 ...     units="metric",
 ...     time_zone="gmt")
 ...
->>> df_predictions.head()
-            date_time  predicted_wl
-0 2012-11-15 00:00:00         3.660
-1 2012-11-15 01:00:00         3.431
-2 2012-11-15 02:00:00         2.842
-3 2012-11-15 03:00:00         1.974
-4 2012-11-15 04:00:00         0.953
+>>> df_predictions.head() # doctest: +NORMALIZE_WHITESPACE
+                     predicted_wl
+date_time
+2012-11-15 00:00:00         3.660
+2012-11-15 01:00:00         3.431
+2012-11-15 02:00:00         2.842
+2012-11-15 03:00:00         1.974
+2012-11-15 04:00:00         0.953
+
+```
+
+**Filtering Data by date**
+
+All data is returned as a pandas dataframe, with a DatimeIndex which allows for easy filtering of the data by dates.
+
+```python
+>>> from py_noaa import coops
+>>> df_predictions = coops.get_data(
+...     begin_date="20121115",
+...     end_date="20121217",
+...     stationid="9447130",
+...     product="predictions",
+...     datum="MLLW",
+...     interval="h",
+...     units="metric",
+...     time_zone="gmt")
+...
+>>> df_predictions['201211150000':'201211151200'] # doctest: +NORMALIZE_WHITESPACE
+                     predicted_wl
+date_time
+2012-11-15 00:00:00         3.660
+2012-11-15 01:00:00         3.431
+2012-11-15 02:00:00         2.842
+2012-11-15 03:00:00         1.974
+2012-11-15 04:00:00         0.953
+2012-11-15 05:00:00        -0.047
+2012-11-15 06:00:00        -0.787
+2012-11-15 07:00:00        -1.045
+2012-11-15 08:00:00        -0.740
+2012-11-15 09:00:00         0.027
+2012-11-15 10:00:00         1.053
+2012-11-15 11:00:00         2.114
+2012-11-15 12:00:00         3.006
 
 ```
 
@@ -130,12 +179,11 @@ Since data is returned in a pandas dataframe, exporting the data is simple using
 >>> df_currents.to_csv(
 ...     'example.csv',
 ...     sep='\t',
-...     encoding='utf-8',
-...     index=False)
+...     encoding='utf-8')
 
 ```
 
-As shwon above, you can set the delimeter type using the `sep=` argument in the `.to_csv` method and control the file encoding using the `encoding=` argument. Setting `index=False` will prevent the index of the pandas dataframe from being inlcuded in the exported csv file.
+As shown above, you can set the delimeter type using the `sep=` argument in the `.to_csv` method and control the file encoding using the `encoding=` argument.
 
 ## Requirements
 ---
@@ -162,5 +210,5 @@ The development of py_noaa was originally intended to help me ([@GClunies](https
 As this project started as a learning exercise, please be patient and willing to teach/learn.
 
 
-**Many thanks needs to be given to the following contributors!**
+**Many thanks to the following contributors!**
 - [@delgadom](https://github.com/delgadom)  
