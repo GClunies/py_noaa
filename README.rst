@@ -9,12 +9,12 @@ python. Analysis of the data is left up to the end user.
 **NOTE:**\  This package is under development, additional modules will
 be added as use cases are encountered that justify new additions.
 
-## Installation
+Installation
 ---------------
 
 ``pip install py_noaa``
 
-## Available Modules & Data:
+Available Modules & Data:
 ----------------------------
 
 -  `NOAA CO-OPS Tides & Currents <https://tidesandcurrents.noaa.gov/>`__
@@ -23,7 +23,7 @@ be added as use cases are encountered that justify new additions.
    -  Predicted water levels (tides)
    -  Observed Currents
 
-## NOAA CO-OPS Tides & Currents
+NOAA CO-OPS Tides & Currents
 -------------------------------
 
 NOAA records tides, currents, and other meteoroligical observations at
@@ -134,7 +134,7 @@ Examples data requests are shown below:
     3 2012-11-15 03:00:00         1.974
     4 2012-11-15 04:00:00         0.953
 
-### Exporting Data
+Exporting Data
 ------------------
 
 Since data is returned in a pandas dataframe, exporting the data is
@@ -165,20 +165,20 @@ the ``encoding=`` argument. Setting ``index=False`` will prevent the
 index of the pandas dataframe from being inlcuded in the exported csv
 file.
 
-## Requirements
+Requirements
 ---------------
 
 For use: - requests - numpy - pandas
 
 Suggested for developement/contributions: - pytest - pytest-cov
 
-## TODO
+TODO
 -------
 
 See `issues <https://github.com/GClunies/py_noaa/issues>`__ for a list
 of issues and to add issues of your own.
 
-## Contribution
+Contribution
 ---------------
 
 All contributions are welcome, feel free to submit a pull request if you

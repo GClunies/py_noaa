@@ -157,19 +157,19 @@ def get_data(begin_date,
     Function to get data from NOAA CO-OPS API and convert it to a pandas 
     dataframe for convienent analysis
 
-    Info on the NOOA CO-OPS API can be found here: 
-    https://tidesandcurrents.noaa.gov/api/
+    Info on the NOOA CO-OPS API can be found at https://tidesandcurrents.noaa.gov/api/, 
+    the arguments listed below generally follow the same (or a very similar) format.
 
     Arguments:
     begin_date -- the starting date of request, string in yyyyMMdd format
     end_date -- the ending data of request, string in yyyyMMdd format
-    stationid -- station at which you want data
-    product -- the product type you would like
-    datum -- the datum to be used for water level data  (default None)
-    bin_num -- the bin number you would like your current data at (default None)
-    interval -- the  
-    units -- units to be used for data output (default metric)
-    time_zone -- time zone to be used for data output (default gmt)
+    stationid -- station at which you want data, string
+    product -- the product type you would like, string
+    datum -- the datum to be used for water level data, string  (default None)
+    bin_num -- the bin number you would like your currents data at, int (default None)
+    interval -- the interval you would like data returned, string
+    units -- units to be used for data output, string (default metric)
+    time_zone -- time zone to be used for data output, string (default gmt)
     """
 
     # convert dates to datetime objects so deltas can be calculated
