@@ -1,4 +1,9 @@
 # py_noaa
+---
+[![Build Status](https://travis-ci.org/GClunies/py_noaa.svg?branch=master)](https://travis-ci.org/GClunies/py_noaa)
+[![PyPI](https://img.shields.io/pypi/v/py_noaa.svg)](https://pypi.python.org/pypi/py-noaa)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py_noaa.svg)](https://pypi.python.org/pypi/py-noaa)
+
 py_noaa is a Python package containing modules to fetch data using various NOAA APIs (e.g., NOAA Tides & Currents) and returning the data in convient formats (i.e., pandas datadrame) for further analysis in python. Analysis of the data is left up to the end user.
 
 **NOTE:**<br>
