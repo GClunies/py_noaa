@@ -44,6 +44,23 @@ def build_query_url(begin_date,
                           'application=py_noaa',
                           'format=json']
 
+    elif product=='hourly_height':
+        if datum==None:
+            raise ValueError('No datum specified for water level data.See'
+                        ' https://tidesandcurrents.noaa.gov/api/#datum '
+                        'for list of available datums')
+        else:   
+            # compile parameter string for use in URL
+            parameters = ['begin_date='+begin_date, 
+                          'end_date='+end_date, 
+                          'station='+stationid, 
+                          'product='+product, 
+                          'datum='+datum, 
+                          'units='+units, 
+                          'time_zone='+time_zone,
+                          'application=py_noaa',
+                          'format=json']
+                          
     elif product=='predictions':
         # if no interval provided, return 6-min predictions data
         if interval==None:
@@ -192,9 +209,60 @@ def get_data(begin_date,
 
         df = url2pandas(data_url, product)
         
-    # If the length of the user specified data request is greater than 31 days, 
-    # need to pull the data from API using requests of 31 day 'blocks' since 
-    # NOAA API prohibits requests larger than 31 days
+    # If the length of the user specified data request is less than 365 days
+    # AND the product is hourly_height, we can pull data directly from the API
+    # in one request
+    elif delta.days <= 365 and product == 'hourly_height':
+        data_url = build_query_url(begin_date, 
+                                   end_date, 
+                                   stationid, 
+                                   product, 
+                                   datum, 
+                                   bin_num,
+                                   interval, 
+                                   units, 
+                                   time_zone)
+
+        df = url2pandas(data_url, product)
+    
+    # If the length of the user specified data request is greater than 365 days
+    # AND the product is hourly_height, we need to load data from the API in 
+    # 365 day blocks.
+    elif product == 'hourly_height':
+        # find the number of 365 day blocks in our desired period,
+        # constrain the upper limit of index in the for loop to follow
+        num_365day_blocks = int(math.floor(delta.days/365))
+
+        df = pd.DataFrame([])    # empty dataframe for data from API requests
+
+        # loop through in 365 day blocks, 
+        # adjust the begin_datetime and end_datetime accordingly,
+        # make a request to the NOAA CO-OPS API
+        for i in range(num_365day_blocks + 1):
+            begin_datetime_loop = begin_datetime + timedelta(days = (i*365) )
+            end_datetime_loop = begin_datetime_loop + timedelta(days=365)
+
+            # if end_datetime_loop of the current 365 day block is greater
+            # than end_datetime specified by user, use end_datetime 
+            if end_datetime_loop > end_datetime: 
+                end_datetime_loop = end_datetime
+            
+            # build url for each API request as we proceed through the loop
+            data_url = build_query_url(begin_datetime_loop.strftime('%Y%m%d'), 
+                                       end_datetime_loop.strftime('%Y%m%d'), 
+                                       stationid, 
+                                       product, 
+                                       datum, 
+                                       bin_num,
+                                       interval,
+                                       units, 
+                                       time_zone)
+
+            df_new = url2pandas(data_url, product)    # get dataframe for block 
+            df = df.append(df_new)    # append to existing dataframe 
+    
+    # If the length of the user specified data request is greater than 31 days
+    # for any other products, we need to load data from the API in 31 day blocks
     else:
         # find the number of 31 day blocks in our desired period,
         # constrain the upper limit of index in the for loop to follow
@@ -238,6 +306,19 @@ def get_data(begin_date,
         
         # convert columns to numeric values
         data_cols = df.columns.drop(['flags', 'QC', 'date_time'])
+        df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
+
+        # convert date & time strings to datetime objects
+        df['date_time'] = pd.to_datetime(df['date_time'])
+
+    elif product == 'hourly_height':
+        # rename columns for clarity
+        df.rename(columns = {'f': 'flags', 's': 'sigma',
+                             't': 'date_time', 'v': 'water_level'}, 
+                             inplace=True)
+        
+        # convert columns to numeric values
+        data_cols = df.columns.drop(['flags', 'date_time'])
         df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
 
         # convert date & time strings to datetime objects
