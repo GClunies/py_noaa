@@ -325,12 +325,22 @@ def get_data(begin_date,
         df['date_time'] = pd.to_datetime(df['date_time'])
 
     elif product == 'predictions':
-        # rename columns for clarity
-        df.rename(columns = {'t': 'date_time', 'v': 'predicted_wl'},
-                             inplace=True)
+        if interval == 'h':
+            # rename columns for clarity
+            df.rename(columns = {'t': 'date_time', 'v': 'predicted_wl'},
+                                 inplace=True)
 
-        # convert columns to numeric values
-        data_cols = df.columns.drop(['date_time', 'type'])
+            # convert columns to numeric values
+            data_cols = df.columns.drop(['date_time'])
+
+        elif interval == 'hilo':
+            # rename columns for clarity
+            df.rename(columns = {'t': 'date_time', 'v': 'predicted_wl', 'type': 'hi/lo'},
+                                 inplace=True)
+
+            # convert columns to numeric values
+            data_cols = df.columns.drop(['date_time', 'hi/lo'])
+
         df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
 
         # convert date & time strings to datetime objects
