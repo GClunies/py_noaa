@@ -335,11 +335,11 @@ def get_data(begin_date,
 
         elif interval == 'hilo':
             # rename columns for clarity
-            df.rename(columns = {'t': 'date_time', 'v': 'predicted_wl', 'type': 'hi/lo'},
+            df.rename(columns = {'t': 'date_time', 'v': 'predicted_wl', 'type': 'hi_lo'},
                                  inplace=True)
 
             # convert columns to numeric values
-            data_cols = df.columns.drop(['date_time', 'hi/lo'])
+            data_cols = df.columns.drop(['date_time', 'hi_lo'])
 
         df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
 
