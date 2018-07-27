@@ -60,6 +60,23 @@ def build_query_url(begin_date,
                           'time_zone='+time_zone,
                           'application=py_noaa',
                           'format=json']
+						  
+    elif product=='high_low':
+        if datum==None:
+            raise ValueError('No datum specified for water level data.See'
+                        ' https://tidesandcurrents.noaa.gov/api/#datum '
+                        'for list of available datums')
+        else:   
+            # compile parameter string for use in URL
+            parameters = ['begin_date='+begin_date, 
+                          'end_date='+end_date, 
+                          'station='+stationid, 
+                          'product='+product, 
+                          'datum='+datum, 
+                          'units='+units, 
+                          'time_zone='+time_zone,
+                          'application=py_noaa',
+                          'format=json']
                           
     elif product=='predictions':
         # if no interval provided, return 6-min predictions data
@@ -210,9 +227,9 @@ def get_data(begin_date,
         df = url2pandas(data_url, product)
         
     # If the length of the user specified data request is less than 365 days
-    # AND the product is hourly_height, we can pull data directly from the API
+    # AND the product is hourly_height or high_low, we can pull data directly from the API
     # in one request
-    elif delta.days <= 365 and product == 'hourly_height':
+    elif delta.days <= 365 and (product == 'hourly_height' or product == 'high_low'):
         data_url = build_query_url(begin_date, 
                                    end_date, 
                                    stationid, 
@@ -226,9 +243,9 @@ def get_data(begin_date,
         df = url2pandas(data_url, product)
     
     # If the length of the user specified data request is greater than 365 days
-    # AND the product is hourly_height, we need to load data from the API in 
+    # AND the product is hourly_height or high_low, we need to load data from the API in 
     # 365 day blocks.
-    elif product == 'hourly_height':
+    elif product == 'hourly_height' or product == 'high_low':
         # find the number of 365 day blocks in our desired period,
         # constrain the upper limit of index in the for loop to follow
         num_365day_blocks = int(math.floor(delta.days/365))
@@ -323,6 +340,44 @@ def get_data(begin_date,
 
         # convert date & time strings to datetime objects
         df['date_time'] = pd.to_datetime(df['date_time'])
+
+    elif product == 'high_low':
+        # rename columns for clarity
+        df.rename(columns = {'f': 'flags', 'ty': 'high_low',
+                             't': 'date_time', 'v': 'water_level'}, 
+                             inplace=True)
+        
+        #Separate to high and low dataframes
+        df_high = df.copy([df['high_low'].str.contains("H")])
+        df_high.rename(columns = {'date_time': 'date_time_high','water_level':'high_water_level'}, 
+                             inplace=True)
+        
+        df_low = df.copy([df['high_low'].str.contains("L")])
+        df_low.rename(columns = {'date_time': 'date_time_low','water_level':'low_water_level'}, 
+                             inplace=True)
+        
+        #Extract dates (without time) for each entry
+        dates_high = [x.date() for x in pd.to_datetime(df_high['date_time_high'])]
+        dates_low = [x.date() for x in pd.to_datetime(df_low['date_time_low'])]
+        
+        df_high['date_time'] = dates_high
+        df_high.index = df_high['date_time']
+        df_low['date_time'] = dates_low
+        df_low.index = df_low['date_time']
+        
+        # remove flags and combine to single dataframe
+        df_high = df_high.drop(columns=['flags', 'high_low']).reset_index(drop=True)
+        df_low = df_low.drop(columns=['flags', 'high_low','date_time']).reset_index(drop=True)
+        df = pd.concat([df_high, df_low], axis=1, join='inner')
+        
+        # convert columns to numeric values
+        data_cols = df.columns.drop(['date_time','date_time_high','date_time_low'])
+        df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
+
+        # convert date & time strings to datetime objects
+        df['date_time'] = pd.to_datetime(df['date_time'])
+        df['date_time_high'] = pd.to_datetime(df['date_time_high'])
+        df['date_time_low'] = pd.to_datetime(df['date_time_low'])
 
     elif product == 'predictions':
         # rename columns for clarity
