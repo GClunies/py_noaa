@@ -407,7 +407,8 @@ def get_data(begin_date,
         df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
 
         # convert date & time strings to datetime objects
-        df['date_time'] = pd.to_datetime(df['date_time'])
+#        df['date_time'] = pd.to_datetime(df['date_time'])
+        df['date_time'] = pd.to_datetime(df.index)
         df['date_time_HH'] = pd.to_datetime(df['date_time_HH'])
         df['date_time_H'] = pd.to_datetime(df['date_time_H'])
         df['date_time_L'] = pd.to_datetime(df['date_time_L'])

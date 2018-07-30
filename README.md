@@ -133,6 +133,30 @@ date_time
 
 ```
 
+**Observed daily extrama (higher-high, high, low, lower-low)**
+
+
+```python
+>>> from py_noaa import coops
+>>> df_high_low = coops.get_data(
+...         begin_date="19940101",
+...         end_date="20180101",
+...         stationid="8771013",
+...         product="high_low",
+...         datum="MLLW",
+...         units="english",
+...         time_zone="lst")
+>>> df_high_low.head()
+                  date_time_HH  HH_water_level       ...              date_time_LL  LL_water_level
+date_time                                            ...
+1994-01-01 1994-01-01 02:54:00           0.915       ...       1994-01-01 15:36:00          -0.344
+1994-01-02 1994-01-02 00:18:00           0.476       ...       1994-01-02 16:06:00          -0.564
+1994-01-03                 NaT             NaN       ...       1994-01-03 16:48:00          -2.497
+1994-01-04 1994-01-04 10:48:00          -0.974       ...       1994-01-04 18:12:00          -1.677
+1994-01-05 1994-01-05 23:36:00           0.525       ...       1994-01-05 05:42:00          -1.217
+
+```
+
 **Filtering Data by date**
 
 All data is returned as a pandas dataframe, with a DatimeIndex which allows for easy filtering of the data by dates.
