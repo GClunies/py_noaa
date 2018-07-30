@@ -348,37 +348,71 @@ def get_data(begin_date,
                              inplace=True)
         
         #Separate to high and low dataframes
-        df_high = df.copy([df['high_low'].str.contains("H")])
-        df_high.rename(columns = {'date_time': 'date_time_high','water_level':'high_water_level'}, 
+        df_HH = df[df['high_low'] == "HH"].copy()
+        df_HH.rename(columns = {'date_time': 'date_time_HH','water_level':'HH_water_level'}, 
                              inplace=True)
         
-        df_low = df.copy([df['high_low'].str.contains("L")])
-        df_low.rename(columns = {'date_time': 'date_time_low','water_level':'low_water_level'}, 
+        df_H = df[df['high_low'] == "H "].copy()
+        df_H.rename(columns = {'date_time': 'date_time_H','water_level':'H_water_level'}, 
+                             inplace=True)
+
+        df_L = df[df['high_low'].str.contains("L ")].copy()
+        df_L.rename(columns = {'date_time': 'date_time_L','water_level':'L_water_level'}, 
                              inplace=True)
         
+        df_LL = df[df['high_low'].str.contains("LL")].copy()
+        df_LL.rename(columns = {'date_time': 'date_time_LL','water_level':'LL_water_level'}, 
+                             inplace=True)
+
         #Extract dates (without time) for each entry
-        dates_high = [x.date() for x in pd.to_datetime(df_high['date_time_high'])]
-        dates_low = [x.date() for x in pd.to_datetime(df_low['date_time_low'])]
+        dates_HH = [x.date() for x in pd.to_datetime(df_HH['date_time_HH'])]
+        dates_H = [x.date() for x in pd.to_datetime(df_H['date_time_H'])]
+        dates_L = [x.date() for x in pd.to_datetime(df_L['date_time_L'])]
+        dates_LL = [x.date() for x in pd.to_datetime(df_LL['date_time_LL'])]
         
-        df_high['date_time'] = dates_high
-        df_high.index = df_high['date_time']
-        df_low['date_time'] = dates_low
-        df_low.index = df_low['date_time']
+        #set indices to datetime
+        df_HH['date_time'] = dates_HH
+        df_HH.index = df_HH['date_time']
+        df_H['date_time'] = dates_H
+        df_H.index = df_H['date_time']        
+        df_L['date_time'] = dates_L
+        df_L.index = df_L['date_time']  
+        df_LL['date_time'] = dates_LL
+        df_LL.index = df_LL['date_time'] 
+        
         
         # remove flags and combine to single dataframe
-        df_high = df_high.drop(columns=['flags', 'high_low']).reset_index(drop=True)
-        df_low = df_low.drop(columns=['flags', 'high_low','date_time']).reset_index(drop=True)
-        df = pd.concat([df_high, df_low], axis=1, join='inner')
+        df_HH = df_HH.drop(columns=['flags', 'high_low'])#.reset_index(drop=True)
+        df_H = df_H.drop(columns=['flags', 'high_low','date_time'])#.reset_index(drop=True)
+        df_L = df_L.drop(columns=['flags', 'high_low','date_time'])#.reset_index(drop=True)
+        df_LL = df_LL.drop(columns=['flags', 'high_low','date_time'])#.reset_index(drop=True)
+        
+        #keep only one instance per date (based on max / min)
+        maxes = df_HH.groupby(df_HH.index).HH_water_level.transform(max)
+        df_HH = df_HH.loc[df_HH.HH_water_level == maxes]
+        maxes = df_H.groupby(df_H.index).H_water_level.transform(max)
+        df_H = df_H.loc[df_H.H_water_level == maxes]        
+        mins = df_L.groupby(df_L.index).L_water_level.transform(max)
+        df_L = df_L.loc[df_L.L_water_level == mins]
+        mins = df_LL.groupby(df_LL.index).LL_water_level.transform(max)
+        df_LL = df_LL.loc[df_LL.LL_water_level == mins]
+        
+        
+        df = df_HH.join(df_H,how='outer')
+        df = df.join(df_L,how='outer')
+        df = df.join(df_LL,how='outer')
         
         # convert columns to numeric values
-        data_cols = df.columns.drop(['date_time','date_time_high','date_time_low'])
+        data_cols = df.columns.drop(['date_time','date_time_HH','date_time_H','date_time_L','date_time_LL'])
         df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
 
         # convert date & time strings to datetime objects
         df['date_time'] = pd.to_datetime(df['date_time'])
-        df['date_time_high'] = pd.to_datetime(df['date_time_high'])
-        df['date_time_low'] = pd.to_datetime(df['date_time_low'])
-
+        df['date_time_HH'] = pd.to_datetime(df['date_time_HH'])
+        df['date_time_H'] = pd.to_datetime(df['date_time_H'])
+        df['date_time_L'] = pd.to_datetime(df['date_time_L'])
+        df['date_time_LL'] = pd.to_datetime(df['date_time_LL'])
+        
     elif product == 'predictions':
         # rename columns for clarity
         df.rename(columns = {'t': 'date_time', 'v': 'predicted_wl'}, 
