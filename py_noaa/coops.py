@@ -160,8 +160,7 @@ def url2pandas(data_url, product):
 
 def parse_known_date_formats(dt_string):
     """Attempts to parse CO-OPS accepted date formats."""
-    #for fmt in ('%Y%m%d', '%Y%m%d %H:%M', '%m/%d/%Y', '%m/%d/%Y %H:%M'):
-    for fmt in ('%Y%m%d', '%Y%m%d %H:%M'):
+    for fmt in ('%Y%m%d', '%Y%m%d %H:%M', '%m/%d/%Y', '%m/%d/%Y %H:%M'):
         try:
             return datetime.strptime(dt_string, fmt)
         except ValueError:
