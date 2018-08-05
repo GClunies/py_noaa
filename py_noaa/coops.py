@@ -160,7 +160,8 @@ def url2pandas(data_url, product):
 
 def parse_known_date_formats(dt_string):
     """Attempts to parse CO-OPS accepted date formats."""
-    for fmt in ('%Y%m%d', '%Y%m%d %H:%M', '%m/%d/%Y', '%m/%d/%Y %H:%M'):
+    #for fmt in ('%Y%m%d', '%Y%m%d %H:%M', '%m/%d/%Y', '%m/%d/%Y %H:%M'):
+    for fmt in ('%Y%m%d', '%Y%m%d %H:%M'):
         try:
             return datetime.strptime(dt_string, fmt)
         except ValueError:
@@ -349,6 +350,19 @@ def get_data(begin_date,
 
             # convert columns to numeric values
             data_cols = df.columns.drop(['date_time', 'hi_lo'])
+
+        # convert date & time strings to datetime objects
+        df['date_time'] = pd.to_datetime(df['date_time'])
+
+    elif product == 'currents':
+        # rename columns for clarity
+        df.rename(columns = {'b': 'bin', 'd': 'direction',
+                             's': 'speed', 't': 'date_time'},
+                             inplace=True)
+
+        # convert columns to numeric values
+        data_cols = df.columns.drop(['date_time'])
+        df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
 
         # convert date & time strings to datetime objects
         df['date_time'] = pd.to_datetime(df['date_time'])
