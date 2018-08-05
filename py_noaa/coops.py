@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 from pandas.io.json import json_normalize
 import requests
-import json
 import math
 
 import time
@@ -23,7 +22,6 @@ def build_query_url(begin_date,
     Builds a URL to be used to fetch data from the NOAA CO-OPS API
     (see https://tidesandcurrents.noaa.gov/api/)
     """
-
     base_url = 'http://tidesandcurrents.noaa.gov/api/datagetter?'
 
     # if the data product is water levels, check that a datum is specified
@@ -34,15 +32,15 @@ def build_query_url(begin_date,
                         'for list of available datums')
         else:
             # compile parameter string for use in URL
-            parameters = ['begin_date='+begin_date,
-                          'end_date='+end_date,
-                          'station='+stationid,
-                          'product='+product,
-                          'datum='+datum,
-                          'units='+units,
-                          'time_zone='+time_zone,
-                          'application=py_noaa',
-                          'format=json']
+            parameters = {'begin_date':begin_date,
+                          'end_date':end_date,
+                          'station':stationid,
+                          'product':product,
+                          'datum':datum,
+                          'units':units,
+                          'time_zone':time_zone,
+                          'application':'py_noaa',
+                          'format':'json'}
 
     elif product=='hourly_height':
         if datum==None:
@@ -51,41 +49,42 @@ def build_query_url(begin_date,
                         'for list of available datums')
         else:
             # compile parameter string for use in URL
-            parameters = ['begin_date='+begin_date,
-                          'end_date='+end_date,
-                          'station='+stationid,
-                          'product='+product,
-                          'datum='+datum,
-                          'units='+units,
-                          'time_zone='+time_zone,
-                          'application=py_noaa',
-                          'format=json']
+            parameters = {'begin_date':begin_date,
+                          'end_date':end_date,
+                          'station':stationid,
+                          'product':product,
+                          'datum':datum,
+                          'units':units,
+                          'time_zone':time_zone,
+                          'application':'py_noaa',
+                          'format':'json'}
 
     elif product=='predictions':
         # if no interval provided, return 6-min predictions data
         if interval==None:
             # compile parameter string for use in URL
-            parameters = ['begin_date='+begin_date,
-                          'end_date='+end_date,
-                          'station='+stationid,
-                          'product='+product,
-                          'datum='+datum,
-                          'units='+units,
-                          'time_zone='+time_zone,
-                          'application=py_noaa',
-                          'format=json']
+            parameters = {'begin_date':begin_date,
+                          'end_date':end_date,
+                          'station':stationid,
+                          'product':product,
+                          'datum':datum,
+                          'units':units,
+                          'time_zone':time_zone,
+                          'application':'py_noaa',
+                          'format':'json'}
+
         else:
             # compile parameter string, including interval, for use in URL
-            parameters = ['begin_date='+begin_date,
-                          'end_date='+end_date,
-                          'station='+stationid,
-                          'product='+product,
-                          'datum='+datum,
-                          'interval='+interval,
-                          'units='+units,
-                          'time_zone='+time_zone,
-                          'application=py_noaa',
-                          'format=json']
+            parameters = {'begin_date':begin_date,
+                          'end_date':end_date,
+                          'station':stationid,
+                          'product':product,
+                          'datum':datum,
+                          'interval':interval,
+                          'units':units,
+                          'time_zone':time_zone,
+                          'application':'py_noaa',
+                          'format':'json'}
 
     # if the data product is currents, check that a bin number is specified
     elif product=='currents':
@@ -95,43 +94,43 @@ def build_query_url(begin_date,
                              ' (e.g., https://tidesandcurrents.noaa.gov/cdata/StationInfo?id=PUG1515)')
         else:
             # compile parameter string for use in URL
-            parameters = ['begin_date='+begin_date,
-                          'end_date='+end_date,
-                          'station='+stationid,
-                          'product='+product,
-                          'bin='+str(bin_num),
-                          'units='+units,
-                          'time_zone='+time_zone,
-                          'application=py_noaa',
-                          'format=json']
+            parameters = {'begin_date':begin_date,
+                          'end_date':end_date,
+                          'station':stationid,
+                          'product':product,
+                          'bin':str(bin_num),
+                          'units':units,
+                          'time_zone':time_zone,
+                          'application':'py_noaa',
+                          'format':'json'}
 
     # for all other data types (e.g., meteoroligcal conditions)
     else:
         # if no interval provided, return 6-min met data
         if interval==None:
             # compile parameter string for use in URL
-            parameters = ['begin_date='+begin_date,
-                      'end_date='+end_date,
-                      'station='+stationid,
-                      'product='+product,
-                      'units='+units,
-                      'time_zone='+time_zone,
-                      'application=py_noaa',
-                      'format=json']
+            parameters = {'begin_date':begin_date,
+                      'end_date':end_date,
+                      'station':stationid,
+                      'product':product,
+                      'units':units,
+                      'time_zone':time_zone,
+                      'application':'py_noaa',
+                      'format':'json'}
         else:
             # compile parameter string, including interval, for use in URL
-            parameters = ['begin_date='+begin_date,
-                      'end_date='+end_date,
-                      'station='+stationid,
-                      'product='+product,
-                      'interval='+interval,
-                      'units='+units,
-                      'time_zone='+time_zone,
-                      'application=py_noaa',
-                      'format=json']
+            parameters = {'begin_date':begin_date,
+                      'end_date':end_date,
+                      'station':stationid,
+                      'product':product,
+                      'interval':interval,
+                      'units':units,
+                      'time_zone':time_zone,
+                      'application':'py_noaa',
+                      'format':'json'}
 
-    parameters_url = '&'.join(parameters)    # join parameters to single string
-    query_url = ''.join([base_url, parameters_url])    # join params & url
+    # Build URL with requests library
+    query_url = requests.Request('GET', base_url, params=parameters).prepare().url
 
     return query_url
 
@@ -142,10 +141,8 @@ def url2pandas(data_url, product):
     (see https://tidesandcurrents.noaa.gov/api/) and converts the corresponding
     json data into a pandas dataframe
     """
-
     response = requests.get(data_url)    # get json data from url
-    json_str = response.text             # json as a string
-    json_dict = json.loads(json_str)     # convert json string to a dict
+    json_dict = response.json()
 
     if 'error' in json_dict:
         raise ValueError(
@@ -159,6 +156,18 @@ def url2pandas(data_url, product):
     df = json_normalize(json_dict[key])   # parse json dict into dataframe
 
     return df
+
+
+def parse_known_date_formats(dt_string):
+    """Attempts to parse CO-OPS accepted date formats."""
+    for fmt in ('%Y%m%d', '%Y%m%d %H:%M', '%m/%d/%Y', '%m/%d/%Y %H:%M'):
+        try:
+            return datetime.strptime(dt_string, fmt)
+        except ValueError:
+            pass
+    raise ValueError("No valid date format found."
+                     "See https://tidesandcurrents.noaa.gov/api/ "
+                     "for list of accepted date formats.")
 
 
 def get_data(begin_date,
@@ -190,15 +199,15 @@ def get_data(begin_date,
     """
 
     # convert dates to datetime objects so deltas can be calculated
-    begin_datetime = datetime.strptime(begin_date, '%Y%m%d')
-    end_datetime = datetime.strptime(end_date, '%Y%m%d')
+    begin_datetime = parse_known_date_formats(begin_date)
+    end_datetime = parse_known_date_formats(end_date)
     delta = end_datetime - begin_datetime
 
     # If the length of our data request is less or equal to 31 days,
     # we can pull the data from API in one request
     if delta.days <=31:
-        data_url = build_query_url(begin_date,
-                                   end_date,
+        data_url = build_query_url(begin_datetime.strftime("%Y%m%d %H:%M"),
+                                   end_datetime.strftime("%Y%m%d %H:%M"),
                                    stationid,
                                    product,
                                    datum,
@@ -340,21 +349,6 @@ def get_data(begin_date,
 
             # convert columns to numeric values
             data_cols = df.columns.drop(['date_time', 'hi_lo'])
-
-        df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
-
-        # convert date & time strings to datetime objects
-        df['date_time'] = pd.to_datetime(df['date_time'])
-
-    elif product == 'currents':
-        # rename columns for clarity
-        df.rename(columns = {'b': 'bin', 'd': 'direction',
-                             's': 'speed', 't': 'date_time'},
-                             inplace=True)
-
-        # convert columns to numeric values
-        data_cols = df.columns.drop(['date_time'])
-        df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
 
         # convert date & time strings to datetime objects
         df['date_time'] = pd.to_datetime(df['date_time'])
