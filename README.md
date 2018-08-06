@@ -132,6 +132,31 @@ date_time
 
 ```
 
+Also available for the `interval` parameter is the `hilo` key which returns High and Low tide predictions.
+
+```python
+>>> from py_noaa import coops
+>>> df_predictions = coops.get_data(
+...     begin_date="20121115",
+...     end_date="20121217",
+...     stationid="9447130",
+...     product="predictions",
+...     datum="MLLW",
+...     interval="hilo",
+...     units="metric",
+...     time_zone="gmt")
+...
+>>> df_predictions.head() # doctest: +NORMALIZE_WHITESPACE
+                    hi_lo  predicted_wl
+date_time
+2012-11-15 06:57:00     L        -1.046
+2012-11-15 14:11:00     H         3.813
+2012-11-15 19:36:00     L         2.037
+2012-11-16 00:39:00     H         3.573
+2012-11-16 07:44:00     L        -1.049
+
+```
+
 **Filtering Data by date**
 
 All data is returned as a pandas dataframe, with a DatimeIndex which allows for easy filtering of the data by dates.
