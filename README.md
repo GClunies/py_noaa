@@ -106,28 +106,6 @@ date_time
 
 ```
 
-**Observed Daily Water Level Extrema (higher-high, high, low, lower-low)**
-
-```python
->>> from py_noaa import coops
->>> df_high_low = coops.get_data(
-...         begin_date="19940101",
-...         end_date="20180101",
-...         stationid="8771013",
-...         product="high_low",
-...         datum="MLLW",
-...         units="english",
-...         time_zone="lst")
->>> df_high_low.head() # doctest: +NORMALIZE_WHITESPACE
-                  date_time_HH       ...        LL_water_level
-date_time                            ... 
-1994-01-01 1994-01-01 02:54:00       ...                -0.344
-1994-01-02 1994-01-02 00:18:00       ...                -0.564
-1994-01-03                 NaT       ...                -2.497
-1994-01-04 1994-01-04 10:48:00       ...                -1.677
-1994-01-05 1994-01-05 23:36:00       ...                -1.217
-```
-
 **Predicted Water Levels (Tides)**
 
 Note the use of the `interval` parameter to specify only hourly data be returned. The `interval` parameter works with, water level, currents, predictions, and meteorological data types.
