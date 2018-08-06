@@ -238,7 +238,7 @@ def get_data(begin_date,
     # If the length of the user specified data request is less than 365 days
     # AND the product is hourly_height or high_low, we can pull data directly from the API
     # in one request
-    elif delta.days <= 365 and product == 'hourly_height' or product == 'high_low'):
+    elif delta.days <= 365 and (product == 'hourly_height' or product == 'high_low'):
         data_url = build_query_url(begin_date,
                                    end_date,
                                    stationid,
