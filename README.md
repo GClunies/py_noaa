@@ -52,6 +52,7 @@ py_noaa accesses data following the [NOAA CO-OPS API](https://tidesandcurrents.n
 - Air pressure
 - Air temperature
 - Water temperature
+- Daily high and low water level
 
 Compatibility with other data products listed on the [NOAA CO-OPS API](https://tidesandcurrents.noaa.gov/api/#products) may exist but is not guaranteed at this time.
 

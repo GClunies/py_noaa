@@ -49,6 +49,23 @@ def build_query_url(begin_date,
                         'for list of available datums')
         else:
             # compile parameter string for use in URL
+            parameters = {'begin_date':begin_date, 
+                          'end_date':end_date, 
+                          'station':stationid, 
+                          'product':product, 
+                          'datum':datum, 
+                          'units':units, 
+                          'time_zone':time_zone,
+                          'application':'py_noaa',
+                          'format':'json'}
+						  
+    elif product=='high_low':
+        if datum==None:
+            raise ValueError('No datum specified for water level data.See'
+                        ' https://tidesandcurrents.noaa.gov/api/#datum '
+                        'for list of available datums')
+        else:   
+            # compile parameter string for use in URL
             parameters = {'begin_date':begin_date,
                           'end_date':end_date,
                           'station':stationid,
@@ -187,8 +204,8 @@ def get_data(begin_date,
     the arguments listed below generally follow the same (or a very similar) format.
 
     Arguments:
-    begin_date -- the starting date of request, string in yyyyMMdd format
-    end_date -- the ending data of request, string in yyyyMMdd format
+    begin_date -- the starting date of request (yyyyMMdd, yyyyMMdd HH:mm, MM/dd/yyyy, or MM/dd/yyyy HH:mm), string
+    end_date -- the ending date of request (yyyyMMdd, yyyyMMdd HH:mm, MM/dd/yyyy, or MM/dd/yyyy HH:mm), string
     stationid -- station at which you want data, string
     product -- the product type you would like, string
     datum -- the datum to be used for water level data, string  (default None)
@@ -219,9 +236,9 @@ def get_data(begin_date,
         df = url2pandas(data_url, product)
 
     # If the length of the user specified data request is less than 365 days
-    # AND the product is hourly_height, we can pull data directly from the API
+    # AND the product is hourly_height or high_low, we can pull data directly from the API
     # in one request
-    elif delta.days <= 365 and product == 'hourly_height':
+    elif delta.days <= 365 and (product == 'hourly_height' or product == 'high_low'):
         data_url = build_query_url(begin_date,
                                    end_date,
                                    stationid,
@@ -235,9 +252,9 @@ def get_data(begin_date,
         df = url2pandas(data_url, product)
 
     # If the length of the user specified data request is greater than 365 days
-    # AND the product is hourly_height, we need to load data from the API in
+    # AND the product is hourly_height or high_low, we need to load data from the API in 
     # 365 day blocks.
-    elif product == 'hourly_height':
+    elif product == 'hourly_height' or product == 'high_low':
         # find the number of 365 day blocks in our desired period,
         # constrain the upper limit of index in the for loop to follow
         num_365day_blocks = int(math.floor(delta.days/365))
@@ -333,6 +350,79 @@ def get_data(begin_date,
         # convert date & time strings to datetime objects
         df['date_time'] = pd.to_datetime(df['date_time'])
 
+    elif product == 'high_low':
+        # rename columns for clarity
+        df.rename(columns = {'f': 'flags', 'ty': 'high_low',
+                             't': 'date_time', 'v': 'water_level'}, 
+                             inplace=True)
+        
+        #Separate to high and low dataframes
+        df_HH = df[df['high_low'] == "HH"].copy()
+        df_HH.rename(columns = {'date_time': 'date_time_HH','water_level':'HH_water_level'}, 
+                             inplace=True)
+        
+        df_H = df[df['high_low'] == "H "].copy()
+        df_H.rename(columns = {'date_time': 'date_time_H','water_level':'H_water_level'}, 
+                             inplace=True)
+
+        df_L = df[df['high_low'].str.contains("L ")].copy()
+        df_L.rename(columns = {'date_time': 'date_time_L','water_level':'L_water_level'}, 
+                             inplace=True)
+        
+        df_LL = df[df['high_low'].str.contains("LL")].copy()
+        df_LL.rename(columns = {'date_time': 'date_time_LL','water_level':'LL_water_level'}, 
+                             inplace=True)
+
+        #Extract dates (without time) for each entry
+        dates_HH = [x.date() for x in pd.to_datetime(df_HH['date_time_HH'])]
+        dates_H = [x.date() for x in pd.to_datetime(df_H['date_time_H'])]
+        dates_L = [x.date() for x in pd.to_datetime(df_L['date_time_L'])]
+        dates_LL = [x.date() for x in pd.to_datetime(df_LL['date_time_LL'])]
+        
+        #set indices to datetime
+        df_HH['date_time'] = dates_HH
+        df_HH.index = df_HH['date_time']
+        df_H['date_time'] = dates_H
+        df_H.index = df_H['date_time']        
+        df_L['date_time'] = dates_L
+        df_L.index = df_L['date_time']  
+        df_LL['date_time'] = dates_LL
+        df_LL.index = df_LL['date_time'] 
+        
+        
+        # remove flags and combine to single dataframe
+        df_HH = df_HH.drop(columns=['flags', 'high_low'])#.reset_index(drop=True)
+        df_H = df_H.drop(columns=['flags', 'high_low','date_time'])#.reset_index(drop=True)
+        df_L = df_L.drop(columns=['flags', 'high_low','date_time'])#.reset_index(drop=True)
+        df_LL = df_LL.drop(columns=['flags', 'high_low','date_time'])#.reset_index(drop=True)
+        
+        #keep only one instance per date (based on max / min)
+        maxes = df_HH.groupby(df_HH.index).HH_water_level.transform(max)
+        df_HH = df_HH.loc[df_HH.HH_water_level == maxes]
+        maxes = df_H.groupby(df_H.index).H_water_level.transform(max)
+        df_H = df_H.loc[df_H.H_water_level == maxes]        
+        mins = df_L.groupby(df_L.index).L_water_level.transform(max)
+        df_L = df_L.loc[df_L.L_water_level == mins]
+        mins = df_LL.groupby(df_LL.index).LL_water_level.transform(max)
+        df_LL = df_LL.loc[df_LL.LL_water_level == mins]
+        
+        
+        df = df_HH.join(df_H,how='outer')
+        df = df.join(df_L,how='outer')
+        df = df.join(df_LL,how='outer')
+        
+        # convert columns to numeric values
+        data_cols = df.columns.drop(['date_time','date_time_HH','date_time_H','date_time_L','date_time_LL'])
+        df[data_cols] = df[data_cols].apply(pd.to_numeric, axis=1, errors='coerce')
+
+        # convert date & time strings to datetime objects
+#        df['date_time'] = pd.to_datetime(df['date_time'])
+        df['date_time'] = pd.to_datetime(df.index)
+        df['date_time_HH'] = pd.to_datetime(df['date_time_HH'])
+        df['date_time_H'] = pd.to_datetime(df['date_time_H'])
+        df['date_time_L'] = pd.to_datetime(df['date_time_L'])
+        df['date_time_LL'] = pd.to_datetime(df['date_time_LL'])
+        
     elif product == 'predictions':
         if interval == 'h':
             # rename columns for clarity
