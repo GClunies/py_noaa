@@ -120,13 +120,12 @@ date_time
 ...         time_zone="lst")
 >>> df_high_low.head() # doctest: +NORMALIZE_WHITESPACE
                   date_time_HH       ...        LL_water_level
-date_time                            ...
+date_time                            ... 
 1994-01-01 1994-01-01 02:54:00       ...                -0.344
 1994-01-02 1994-01-02 00:18:00       ...                -0.564
 1994-01-03                 NaT       ...                -2.497
 1994-01-04 1994-01-04 10:48:00       ...                -1.677
 1994-01-05 1994-01-05 23:36:00       ...                -1.217
-
 ```
 
 **Predicted Water Levels (Tides)**
