@@ -106,6 +106,29 @@ date_time
 
 ```
 
+**Observed Daily Water Level Extrema (higher-high, high, low, lower-low)**
+
+```python
+>>> from py_noaa import coops
+>>> df_high_low = coops.get_data(
+...         begin_date="19940101",
+...         end_date="20180101",
+...         stationid="8771013",
+...         product="high_low",
+...         datum="MLLW",
+...         units="english",
+...         time_zone="lst")
+>>> df_high_low.head() # doctest: +NORMALIZE_WHITESPACE
+                  date_time_HH  HH_water_level       ...              date_time_LL  LL_water_level
+date_time                                            ...
+1994-01-01 1994-01-01 02:54:00           0.915       ...       1994-01-01 15:36:00          -0.344
+1994-01-02 1994-01-02 00:18:00           0.476       ...       1994-01-02 16:06:00          -0.564
+1994-01-03                 NaT             NaN       ...       1994-01-03 16:48:00          -2.497
+1994-01-04 1994-01-04 10:48:00          -0.974       ...       1994-01-04 18:12:00          -1.677
+1994-01-05 1994-01-05 23:36:00           0.525       ...       1994-01-05 05:42:00          -1.217
+
+```
+
 **Predicted Water Levels (Tides)**
 
 Note the use of the `interval` parameter to specify only hourly data be returned. The `interval` parameter works with, water level, currents, predictions, and meteorological data types.
@@ -133,27 +156,28 @@ date_time
 
 ```
 
-**Observed daily extrama (higher-high, high, low, lower-low)**
-
+Also available for the `interval` parameter is the `hilo` key which returns High and Low tide predictions.
 
 ```python
 >>> from py_noaa import coops
->>> df_high_low = coops.get_data(
-...         begin_date="19940101",
-...         end_date="20180101",
-...         stationid="8771013",
-...         product="high_low",
-...         datum="MLLW",
-...         units="english",
-...         time_zone="lst")
->>> df_high_low.head()
-                  date_time_HH  HH_water_level       ...              date_time_LL  LL_water_level
-date_time                                            ...
-1994-01-01 1994-01-01 02:54:00           0.915       ...       1994-01-01 15:36:00          -0.344
-1994-01-02 1994-01-02 00:18:00           0.476       ...       1994-01-02 16:06:00          -0.564
-1994-01-03                 NaT             NaN       ...       1994-01-03 16:48:00          -2.497
-1994-01-04 1994-01-04 10:48:00          -0.974       ...       1994-01-04 18:12:00          -1.677
-1994-01-05 1994-01-05 23:36:00           0.525       ...       1994-01-05 05:42:00          -1.217
+>>> df_predictions = coops.get_data(
+...     begin_date="20121115",
+...     end_date="20121217",
+...     stationid="9447130",
+...     product="predictions",
+...     datum="MLLW",
+...     interval="hilo",
+...     units="metric",
+...     time_zone="gmt")
+...
+>>> df_predictions.head() # doctest: +NORMALIZE_WHITESPACE
+                    hi_lo  predicted_wl
+date_time
+2012-11-15 06:57:00     L        -1.046
+2012-11-15 14:11:00     H         3.813
+2012-11-15 19:36:00     L         2.037
+2012-11-16 00:39:00     H         3.573
+2012-11-16 07:44:00     L        -1.049
 
 ```
 
