@@ -1,12 +1,9 @@
-import numpy as np
-import pandas as pd
-from pandas.io.json import json_normalize
-import requests
 import math
+from datetime import datetime, timedelta
 
-import time
-from datetime import datetime, timedelta, date
-import sys
+import pandas as pd
+import requests
+from pandas.io.json import json_normalize
 
 
 def build_query_url(begin_date,
