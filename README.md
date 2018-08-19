@@ -109,6 +109,7 @@ date_time
 2015-01-01 02:00:00  0,0,0,0  v  0.009        0.284
 2015-01-01 03:00:00  0,0,0,0  v  0.010       -0.126
 2015-01-01 04:00:00  0,0,0,0  v  0.013       -0.161
+
 ```
 
 **Predicted Water Levels (Tides)**
@@ -135,6 +136,7 @@ date_time
 2012-11-15 02:00:00         2.842
 2012-11-15 03:00:00         1.974
 2012-11-15 04:00:00         0.953
+
 ```
 
 Also available for the `interval` parameter is the `hilo` key which returns High and Low tide predictions.
@@ -159,6 +161,7 @@ date_time
 2012-11-15 19:36:00     L         2.037
 2012-11-16 00:39:00     H         3.573
 2012-11-16 07:44:00     L        -1.049
+
 ```
 
 **Filtering Data by date**
@@ -193,6 +196,7 @@ date_time
 2012-11-15 10:00:00         1.053
 2012-11-15 11:00:00         2.114
 2012-11-15 12:00:00         3.006
+
 ```
 
 ### Exporting Data 
@@ -213,6 +217,7 @@ Since data is returned in a pandas dataframe, exporting the data is simple using
 ...     'example.csv',
 ...     sep='\t',
 ...     encoding='utf-8')
+
 ```
 
 As shown above, you can set the delimeter type using the `sep=` argument in the `.to_csv` method and control the file encoding using the `encoding=` argument.
