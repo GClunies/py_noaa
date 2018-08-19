@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(name='py_noaa',
-      version='0.2.2',
-      description='Python module to fetch data from NOAA APIs',
+      version='0.3.0',
+      description='Python wrapper to fetch data from NOAA APIs',
       url='https://github.com/GClunies/py_noaa',
       author='Greg Clunies',
       author_email='greg.clunies@gmail.com',
