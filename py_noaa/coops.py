@@ -39,7 +39,7 @@ def build_query_url(
                              ' https://tidesandcurrents.noaa.gov/api/#datum '
                              'for list of available datums')
         else:
-            # compile parameter string for use in URL
+            # Compile parameter string for use in URL
             parameters = {'begin_date': begin_date,
                           'end_date': end_date,
                           'station': stationid,
@@ -114,7 +114,7 @@ def build_query_url(
 
     # For all other data types (e.g., meteoroligcal conditions)
     else:
-        # if no interval provided, return 6-min met data
+        # If no interval provided, return 6-min met data
         if interval is None:
             # Compile parameter string for use in URL
             parameters = {'begin_date': begin_date,
@@ -266,7 +266,7 @@ def get_data(
         # constrain the upper limit of index in the for loop to follow
         num_31day_blocks = int(math.floor(delta.days / 31))
 
-        df = pd.DataFrame([])  # empty dataframe for data from API requests
+        df = pd.DataFrame([])  # Empty dataframe for data from API requests
 
         # Loop through in 31 day blocks,
         # adjust the begin_datetime and end_datetime accordingly,
@@ -286,8 +286,8 @@ def get_data(
                 end_datetime_loop.strftime('%Y%m%d'),
                 stationid, product, datum, bin_num, interval, units, time_zone)
 
-            df_new = url2pandas(data_url, product)  # get dataframe for block
-            df = df.append(df_new)  # append to existing dataframe
+            df_new = url2pandas(data_url, product)  # Get dataframe for block
+            df = df.append(df_new)  # Append to existing dataframe
 
     # Rename output dataframe columns based on requested product
     # and convert to useable data types
@@ -352,7 +352,7 @@ def get_data(
         dates_L = [x.date() for x in pd.to_datetime(df_L['date_time_L'])]
         dates_LL = [x.date() for x in pd.to_datetime(df_LL['date_time_LL'])]
 
-        # set indices to datetime
+        # Set indices to datetime
         df_HH['date_time'] = dates_HH
         df_HH.index = df_HH['date_time']
         df_H['date_time'] = dates_H
@@ -364,13 +364,13 @@ def get_data(
 
         # Remove flags and combine to single dataframe
         df_HH = df_HH.drop(
-            columns=['flags', 'high_low'])  # .reset_index(drop=True)
+            columns=['flags', 'high_low'])
         df_H = df_H.drop(columns=['flags', 'high_low',
-                                  'date_time'])  # .reset_index(drop=True)
+                                  'date_time'])
         df_L = df_L.drop(columns=['flags', 'high_low',
-                                  'date_time'])  # .reset_index(drop=True)
+                                  'date_time'])
         df_LL = df_LL.drop(columns=['flags', 'high_low',
-                                    'date_time'])  # .reset_index(drop=True)
+                                    'date_time'])
 
         # Keep only one instance per date (based on max/min)
         maxes = df_HH.groupby(df_HH.index).HH_water_level.transform(max)
@@ -394,7 +394,6 @@ def get_data(
                                             errors='coerce')
 
         # Convert date & time strings to datetime objects
-        #        df['date_time'] = pd.to_datetime(df['date_time'])
         df['date_time'] = pd.to_datetime(df.index)
         df['date_time_HH'] = pd.to_datetime(df['date_time_HH'])
         df['date_time_H'] = pd.to_datetime(df['date_time_H'])
