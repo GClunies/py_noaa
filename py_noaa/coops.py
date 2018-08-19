@@ -1,12 +1,9 @@
-import numpy as np
-import pandas as pd
-from pandas.io.json import json_normalize
-import requests
 import math
+from datetime import datetime, timedelta
 
-import time
-from datetime import datetime, timedelta, date
-import sys
+import pandas as pd
+import requests
+from pandas.io.json import json_normalize
 
 
 def build_query_url(
@@ -153,6 +150,7 @@ def url2pandas(data_url, product):
     (see https://tidesandcurrents.noaa.gov/api/) and converts the corresponding
     JSON data into a pandas dataframe.
     """
+
     response = requests.get(data_url)  # Get JSON data from URL
     json_dict = response.json()
 
