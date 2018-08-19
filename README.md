@@ -53,14 +53,15 @@ NOAA records tides, currents, and other meteoroligical observations at various l
 
     - Currents
     - Observed water levels
-    - Predicted water levels (tides)
+    - Observered daily high and low water levels (use `product="high_low"`)
+    - Predicted water levels
+    - Predicted high and low water levels
     - Winds
     - Air pressure
     - Air temperature
     - Water temperature
-    - Daily high and low water level
 
-Compatibility with other data products listed on the [NOAA CO-OPS API](https://tidesandcurrents.noaa.gov/api/#products) may exist but is not guaranteed at this time.
+Compatibility with other data products listed on the [NOAA CO-OPS API](https://tidesandcurrents.noaa.gov/api/#products) may exist, but is not guaranteed at this time.
 
 ### Examples data requests are shown below:
 
@@ -251,4 +252,7 @@ As this project started as a learning exercise, please be patient and willing to
 
 **Many thanks to the following contributors!**
 
-- [@delgadom](https://github.com/delgadom)  
+- [@delgadom](https://github.com/delgadom)
+- [@CraigHarter](https://github.com/CraigHarter)
+- [@jcconnel](https://github.com/jcconnell)
+- [@fabaff](https://github.com/fabaff)
