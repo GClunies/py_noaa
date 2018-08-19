@@ -155,7 +155,7 @@ def url2pandas(data_url, product):
     (see https://tidesandcurrents.noaa.gov/api/) and converts the corresponding
     json data into a pandas dataframe
     """
-    response = requests.get(data_url)    # get json data from url
+    response = requests.get(data_url, timeout=10)    # get json data from url
     json_dict = response.json()
 
     if 'error' in json_dict:
