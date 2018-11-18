@@ -254,9 +254,12 @@ def get_data(
                 begin_datetime_loop.strftime('%Y%m%d'),
                 end_datetime_loop.strftime('%Y%m%d'),
                 stationid, product, datum, bin_num, interval, units, time_zone)
-
-            df_new = url2pandas(data_url, product)  # Get dataframe for block
-            df = df.append(df_new)  # Append to existing dataframe
+            
+            try:
+                df_new = url2pandas(data_url, product)  # Get dataframe for block
+                df = df.append(df_new)  # Append to existing dataframe
+            except ValueError:
+                continue  # If data block has bad dates, skip to next block
 
     # If the length of the user specified data request is greater than 31 days
     # for any other products, we need to load data from the API in 31 day
@@ -285,9 +288,12 @@ def get_data(
                 begin_datetime_loop.strftime('%Y%m%d'),
                 end_datetime_loop.strftime('%Y%m%d'),
                 stationid, product, datum, bin_num, interval, units, time_zone)
-
-            df_new = url2pandas(data_url, product)  # Get dataframe for block
-            df = df.append(df_new)  # Append to existing dataframe
+            
+            try:
+                df_new = url2pandas(data_url, product)  # Get dataframe for block
+                df = df.append(df_new)  # Append to existing dataframe
+            except ValueError:
+                continue  # If data block has bad dates, skip to next block
 
     # Rename output dataframe columns based on requested product
     # and convert to useable data types
