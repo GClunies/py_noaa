@@ -144,7 +144,7 @@ def build_query_url(
     return query_url
 
 
-def url2pandas(data_url, product):
+def url2pandas(data_url, product, num_request_blocks):
     """
     Takes in a provided URL using the NOAA CO-OPS API conventions
     (see https://tidesandcurrents.noaa.gov/api/) and converts the corresponding
@@ -152,20 +152,65 @@ def url2pandas(data_url, product):
     """
 
     response = requests.get(data_url)  # Get JSON data from URL
-    json_dict = response.json()
+    json_dict = response.json()  # Create a dictionary from JSON data
 
-    if 'error' in json_dict:
+    df = pd.DataFrame()  # Initialize a empty DataFrame
+
+    # Error when the requested begin_date and/or end_date does not have data
+    large_data_gap_error = 'No data was found. This product may not be offered at this station at the requested time.'
+
+    # Handle coops.get_data() request size & errors from COOPS API, cases below:
+        # 1. coops.get_data() makes a large request (i.e. >1 block requests)
+        #    and an error occurs in one of the individual blocks of data
+
+        # 2. coops.get_data() makes a large request (i.e. >1 block requests)
+        #    and an error does not occur in one of the individual blocks of data
+
+        # 3. coops.get_data() makes a small request (i.e. 1 request)
+        #    and an error occurs in the data requested
+
+        # 4. coops.get_data() makes a small request (i.e. 1 request)
+        #    and an error does not occur in the data requested
+
+    # Case 1
+    if (num_request_blocks > 1) and ('error' in json_dict): 
+        error_message = json_dict['error'].get('message',
+                                               'Error retrieving data')
+        error_message = error_message.lstrip()
+        error_message = error_message.rstrip()
+
+        if error_message == large_data_gap_error:
+            return df  # Return the empty DataFrame
+        else:
+            raise ValueError(
+                json_dict['error'].get('message', 'Error retrieving data'))
+
+    # Case 2
+    elif (num_request_blocks > 1) and ('error' not in json_dict):
+        if product == 'predictions':
+            key = 'predictions'
+        else:
+            key = 'data'
+
+        df = json_normalize(json_dict[key])  # Parse JSON dict into dataframe
+
+        return df
+
+    # Case 3
+    elif (num_request_blocks == 1) and ('error' in json_dict):
         raise ValueError(
-            json_dict['error'].get('message', 'Error retrieving data'))
-
-    if product == 'predictions':
-        key = 'predictions'
+                json_dict['error'].get('message', 'Error retrieving data'))
+    
+    # Case 4
     else:
-        key = 'data'
+        if product == 'predictions':
+            key = 'predictions'
+        else:
+            key = 'data'
 
-    df = json_normalize(json_dict[key])  # Parse JSON dict into dataframe
+        df = json_normalize(json_dict[key])  # Parse JSON dict into dataframe
 
-    return df
+        return df
 
 
 def parse_known_date_formats(dt_string):
@@ -214,7 +259,7 @@ def get_data(
             end_datetime.strftime("%Y%m%d %H:%M"),
             stationid, product, datum, bin_num, interval, units, time_zone)
 
-        df = url2pandas(data_url, product)
+        df = url2pandas(data_url, product, num_request_blocks=1)
 
     # If the length of the user specified data request is less than 365 days
     # AND the product is hourly_height or high_low, we can pull data directly
@@ -225,7 +270,7 @@ def get_data(
             begin_date, end_date, stationid, product, datum, bin_num, interval,
             units, time_zone)
 
-        df = url2pandas(data_url, product)
+        df = url2pandas(data_url, product, num_request_blocks=1)
 
     # If the length of the user specified data request is greater than 365 days
     # AND the product is hourly_height or high_low, we need to load data from
@@ -254,10 +299,10 @@ def get_data(
                 begin_datetime_loop.strftime('%Y%m%d'),
                 end_datetime_loop.strftime('%Y%m%d'),
                 stationid, product, datum, bin_num, interval, units, time_zone)
-
-            df_new = url2pandas(data_url, product)  # Get dataframe for block
+            
+            df_new = url2pandas(data_url, product, num_365day_blocks)  # Get dataframe for block
             df = df.append(df_new)  # Append to existing dataframe
-
+            
     # If the length of the user specified data request is greater than 31 days
     # for any other products, we need to load data from the API in 31 day
     # blocks
@@ -285,10 +330,10 @@ def get_data(
                 begin_datetime_loop.strftime('%Y%m%d'),
                 end_datetime_loop.strftime('%Y%m%d'),
                 stationid, product, datum, bin_num, interval, units, time_zone)
-
-            df_new = url2pandas(data_url, product)  # Get dataframe for block
+            
+            df_new = url2pandas(data_url, product, num_31day_blocks)  # Get dataframe for block
             df = df.append(df_new)  # Append to existing dataframe
-
+            
     # Rename output dataframe columns based on requested product
     # and convert to useable data types
     if product == 'water_level':
