@@ -152,26 +152,40 @@ def url2pandas(data_url, product, num_request_blocks):
     """
 
     response = requests.get(data_url)  # Get JSON data from URL
-    json_dict = response.json()
+    json_dict = response.json()  # Create a dictionary from JSON data
 
-    df = pd.DataFrame()
+    df = pd.DataFrame()  # Initialize a empty DataFrame
 
-    # Error below is thrown when the requested start/end dates do not have data
-    large_data_gap_error = 'No data was found. This product may not be \
-                            offered at this station at the requested time.'
+    # Error when the requested begin_date and/or end_date does not have data
+    large_data_gap_error = 'No data was found. This product may not be offered at this station at the requested time.'
 
-    if (num_request_blocks > 1) and ('error' in json_dict):
+    # Handle coops.get_data() request size & errors from COOPS API, cases below:
+        # 1. coops.get_data() makes a large request (i.e. >1 block requests)
+        #    and an error occurs in one of the individual blocks of data
+
+        # 2. coops.get_data() makes a large request (i.e. >1 block requests)
+        #    and an error does not occur in one of the individual blocks of data
+
+        # 3. coops.get_data() makes a small request (i.e. 1 request)
+        #    and an error occurs in the data requested
+
+        # 4. coops.get_data() makes a small request (i.e. 1 request)
+        #    and an error does not occur in the data requested
+
+    # Case 1
+    if (num_request_blocks > 1) and ('error' in json_dict): 
         error_message = json_dict['error'].get('message',
                                                'Error retrieving data')
         error_message = error_message.lstrip()
         error_message = error_message.rstrip()
 
         if error_message == large_data_gap_error:
-            return df  # Return the empty DataFrame... maybe use continue??
+            return df  # Return the empty DataFrame
         else:
             raise ValueError(
                 json_dict['error'].get('message', 'Error retrieving data'))
 
+    # Case 2
     elif (num_request_blocks > 1) and ('error' not in json_dict):
         if product == 'predictions':
             key = 'predictions'
@@ -182,10 +196,12 @@ def url2pandas(data_url, product, num_request_blocks):
 
         return df
 
+    # Case 3
     elif (num_request_blocks == 1) and ('error' in json_dict):
         raise ValueError(
                 json_dict['error'].get('message', 'Error retrieving data'))
     
+    # Case 4
     else:
         if product == 'predictions':
             key = 'predictions'
