@@ -13,3 +13,6 @@ dist/
 .cache
 .coverage
 .pytest_cache
+
+# Example .csv files
+.csv
