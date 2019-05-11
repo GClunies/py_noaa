@@ -4,11 +4,11 @@
 [![PyPI](https://img.shields.io/pypi/v/py_noaa.svg)](https://pypi.python.org/pypi/py-noaa)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py_noaa.svg)](https://pypi.python.org/pypi/py-noaa)
 
-`py_noaa` is a Python package containing modules to fetch data using various NOAA APIs (e.g., NOAA Tides & Currents) and returning the data in convenient formats (i.e., pandas dataframe) for further analysis in python. Analysis of the data is left up to the end user.
+`py_noaa` is a Python package that wraps around the NOAA CO-OPS Tides & Currents API and returns data in convenient formats (i.e., pandas dataframe) for further analysis in python. Analysis of the data is left up to the end user.
 
 **NOTE:**
 
-This package is under development, additional modules will be added as use cases are encountered that justify new additions.
+This package is under development, additional functionality will be added over time.
 
 ## Installation
 
@@ -20,20 +20,17 @@ You can update `py_noaa` using:
 
 ```bash
 pip install py_noaa --upgrade
-```
-
-## Available Modules & Data
-
-- [NOAA CO-OPS Tides & Currents](https://tidesandcurrents.noaa.gov/)
-  - Observed water levels
-  - Predicted water levels (tides)
-  - Observed Currents 
+``` 
 
 ## NOAA CO-OPS Tides & Currents
 
 NOAA records tides, currents, and other meteoroligical observations at various locations across the United States and the Great Lakes regions. Predictions are also available for [tides](https://tidesandcurrents.noaa.gov/tide_predictions.html) and [currents](https://tidesandcurrents.noaa.gov/noaacurrents/Help).
 
 `py_noaa` accesses data following the [NOAA CO-OPS API](https://tidesandcurrents.noaa.gov/api/) documentation.
+
+## Available Data
+
+A list of available data products is provided in the [API documentation](https://tidesandcurrents.noaa.gov/api/#products)
 
 ### CO-OPS module basics
 
