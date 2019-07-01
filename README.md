@@ -4,6 +4,9 @@
 [![PyPI](https://img.shields.io/pypi/v/py_noaa.svg)](https://pypi.python.org/pypi/py-noaa)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py_noaa.svg)](https://pypi.python.org/pypi/py-noaa)
 
+**NOTE: THIS PACKAGE HAS BEEN REPLACED BY [`noaa_coops`](https://github.com/GClunies/noaa_coops). NO FURTHER DEVELOPMENT IS PLANNED.
+ 
+
 `py_noaa` is a Python package that wraps around the NOAA CO-OPS Tides & Currents API and returns data in convenient formats (i.e., pandas dataframe) for further analysis in python. Analysis of the data is left up to the end user.
 
 **NOTE:**
